@@ -840,6 +840,35 @@ function toggleAddEventSection() {
     }
 }
 
+// Modal Functions
+function openProjectHub() {
+    document.getElementById('projectHub').style.display = 'block';
+    // Initialize the first tab by directly showing it
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => {
+        content.style.display = 'none';
+    });
+    document.getElementById('links').style.display = 'block';
+    
+    // Set the first tab button as active
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.classList.remove('active');
+    });
+    if (tabButtons[0]) {
+        tabButtons[0].classList.add('active');
+    }
+    
+    // Render content
+    renderEvents();
+    renderTasks();
+    renderLinks();
+}
+
+function closeProjectHub() {
+    document.getElementById('projectHub').style.display = 'none';
+}
+
 // Tab Functions
 function openTab(event, tabName) {
     // Hide all tab contents
@@ -955,9 +984,19 @@ function setupEventListeners() {
         pdfModal.addEventListener('click', function(e) {
             if (e.target === pdfModal) {
                 closePDFViewer();
-                            }
-                        });
-                    }
+            }
+        });
+    }
+    
+    // Project Hub Modal close
+    const projectHubModal = document.getElementById('projectHub');
+    if (projectHubModal) {
+        projectHubModal.addEventListener('click', function(e) {
+            if (e.target === projectHubModal) {
+                closeProjectHub();
+            }
+        });
+    }
     
     // Form submissions
     const addEventForm = document.getElementById('addEventForm');
