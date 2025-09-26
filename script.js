@@ -381,6 +381,17 @@ function showDayEvents(dateString) {
     }
 }
 
+// Calendar navigation functions
+function previousMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+}
+
 // Event Functions
 function renderEvents() {
     const eventsList = document.getElementById('eventsList');
@@ -830,7 +841,7 @@ function toggleAddEventSection() {
 }
 
 // Tab Functions
-function openTab(tabName) {
+function openTab(event, tabName) {
     // Hide all tab contents
     const tabContents = document.querySelectorAll('.tab-content');
     tabContents.forEach(content => {
@@ -838,7 +849,7 @@ function openTab(tabName) {
     });
     
     // Remove active class from all tab buttons
-    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabButtons = document.querySelectorAll('.tab-button');
     tabButtons.forEach(button => {
         button.classList.remove('active');
     });
@@ -850,7 +861,7 @@ function openTab(tabName) {
     event.target.classList.add('active');
     
     // Re-render content when switching tabs
-    if (tabName === 'projectHub') {
+    if (tabName === 'links') {
         renderEvents();
         renderTasks();
         renderLinks();
