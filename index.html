@@ -41,6 +41,11 @@
             query,
             orderBy
         };
+        
+        // Load the main script after Firebase is ready
+        const script = document.createElement('script');
+        script.src = 'script.js?v=4';
+        document.head.appendChild(script);
     </script>
     
     <!-- PDF.js Library -->
@@ -498,6 +503,5 @@
         </div>
     </footer>
 
-    <script src="script.js?v=3"></script>
 </body>
 </html>
