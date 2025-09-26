@@ -94,21 +94,38 @@ function clearAllData() {
         
         events = [];
         tasks = [];
+        // Reset to default links with repository PDFs
         links = {
-            course: [],
-            technical: [],
-            communication: [],
-            external: [],
-            documents: []
+            course: [
+                { title: "Concept Generation Guide", url: "pdfs/Concept Generation Guide.pdf" }
+            ],
+            technical: [
+                { title: "Capacitors and Motors", url: "pdfs/Capacitors and Motors.pdf" }
+            ],
+            communication: [
+                { title: "Discord Server", url: "https://discord.gg/example" },
+                { title: "Slack Workspace", url: "https://slack.com/example" },
+                { title: "Google Drive", url: "https://drive.google.com/example" }
+            ],
+            external: [
+                { title: "Solar Car Competitions", url: "https://www.worldsolarchallenge.org/" },
+                { title: "Engineering Forums", url: "https://www.engineering.com/" }
+            ],
+            documents: [
+                { title: "Project Brief", url: "pdfs/Project Brief.pdf" }
+            ]
         };
         morphChartData = null;
         
-            renderEvents();
-            renderTasks();
-            renderLinks();
+        // Save the reset links to localStorage
+        saveToLocalStorage();
         
-        showNotification('All data cleared successfully!');
-        }
+        renderEvents();
+        renderTasks();
+        renderLinks();
+        
+        showNotification('All data cleared and reset to default PDFs!');
+    }
 }
 
 // User management
@@ -969,6 +986,34 @@ function setupEventListeners() {
     
     // Load morph chart
     loadMorphChart();
+}
+
+// Force reset links to repository PDFs
+function resetToRepositoryPDFs() {
+    links = {
+        course: [
+            { title: "Concept Generation Guide", url: "pdfs/Concept Generation Guide.pdf" }
+        ],
+        technical: [
+            { title: "Capacitors and Motors", url: "pdfs/Capacitors and Motors.pdf" }
+        ],
+        communication: [
+            { title: "Discord Server", url: "https://discord.gg/example" },
+            { title: "Slack Workspace", url: "https://slack.com/example" },
+            { title: "Google Drive", url: "https://drive.google.com/example" }
+        ],
+        external: [
+            { title: "Solar Car Competitions", url: "https://www.worldsolarchallenge.org/" },
+            { title: "Engineering Forums", url: "https://www.engineering.com/" }
+        ],
+        documents: [
+            { title: "Project Brief", url: "pdfs/Project Brief.pdf" }
+        ]
+    };
+    
+    saveToLocalStorage();
+    renderLinks();
+    showNotification('Links reset to repository PDFs!');
 }
 
 // Initialize PDF.js
