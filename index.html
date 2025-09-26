@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Truck Project - DPST1071</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBLIsi_VczMnVoKoNaHqJimZRHUv5QaZDc",
+            authDomain: "solar-truck-database.firebaseapp.com",
+            projectId: "solar-truck-database",
+            storageBucket: "solar-truck-database.firebasestorage.app",
+            messagingSenderId: "852200317885",
+            appId: "1:852200317885:web:c5bc1fb607f9d282bfa8d4"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase available globally
+        window.firebaseApp = app;
+        window.db = db;
+        window.firebaseFunctions = {
+            collection,
+            addDoc,
+            getDocs,
+            onSnapshot,
+            doc,
+            updateDoc,
+            deleteDoc,
+            query,
+            orderBy
+        };
+    </script>
+    
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>SOLAR TRUCK</h1>
+                <span>PROJECT</span>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#team">Our Team</a></li>
+                    <li><a href="#vehicle">Vehicle</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Built by Students.<br>Driving Innovation. <br> Created by Team 13</h2>
+        </div>
+        <div class="hero-image">
+            <!-- Project Hub Button on the right side -->
+            <div class="hero-right-cta">
+                <button class="hero-project-hub-button" onclick="openProjectHub()">
+                    <i class="fas fa-cogs"></i>
+                    <span>Project Hub</span>
+                    <small>Manage Links, Calendar, Plans & Tasks</small>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Hub Modal -->
+    <div id="projectHub" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeProjectHub()">&times;</span>
+            <h2>Project Hub</h2>
+            <div class="user-identification">
+                <label for="userName">Your Name:</label>
+                <input type="text" id="userName" placeholder="Enter your name" value="">
+                <button onclick="saveUserName()" class="user-save-btn">Save</button>
+            </div>
+            <div class="hub-tabs">
+                <button class="tab-button active" onclick="openTab(event, 'links')">Links & Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'calendar')">Calendar & Schedule</button>
+                <button class="tab-button" onclick="openTab(event, 'morph')">Morph Chart</button>
+                <button class="tab-button" onclick="openTab(event, 'tasks')">Tasks & Progress</button>
+            </div>
+
+            <!-- Links & Resources Tab -->
+            <div id="links" class="tab-content active">
+                <div class="tab-header">
+                    <h3>Important Links & Resources</h3>
+                    <button class="edit-mode-btn" id="linksEditBtn" onclick="toggleEditMode('links')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+                <div class="links-grid" id="linksGrid">
+                    <!-- Links will be dynamically loaded here -->
+                </div>
+                <div class="action-buttons">
+                    <button class="action-btn" id="addLinkBtn" onclick="toggleAddLinkSection()">
+                        <i class="fas fa-plus"></i> Add New Link
+                    </button>
+                    <button class="action-btn" id="uploadPDFBtn" onclick="toggleUploadPDFSection()">
+                        <i class="fas fa-upload"></i> Upload PDF Document
+                    </button>
+                </div>
+                
+                <div class="add-link-section collapsible" id="addLinkSection" style="display: none;">
+                    <div class="section-header">
+                        <h4>Add New Link</h4>
+                        <button class="close-btn" onclick="toggleAddLinkSection()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="addLinkForm">
+                        <input type="text" id="linkTitle" placeholder="Link Title" required>
+                        <input type="url" id="linkUrl" placeholder="URL" required>
+                        <select id="linkCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="course">Course Materials</option>
+                            <option value="technical">Technical Resources</option>
+                            <option value="communication">Team Communication</option>
+                            <option value="external">External Resources</option>
+                            <option value="documents">Project Documents</option>
+                        </select>
+                        <button type="submit">Add Link</button>
+                    </form>
+                </div>
+                
+                <div class="upload-section collapsible" id="uploadPDFSection" style="display: none;">
+                    <div class="section-header">
+                        <h4>Upload PDF Document</h4>
+                        <button class="close-btn" onclick="toggleUploadPDFSection()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="uploadPDFForm">
+                        <input type="text" id="pdfTitle" placeholder="Document Title" required>
+                        <input type="file" id="pdfFile" accept=".pdf" required>
+                        <select id="pdfCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="course">Course Materials</option>
+                            <option value="technical">Technical Resources</option>
+                            <option value="communication">Team Communication</option>
+                            <option value="external">External Resources</option>
+                            <option value="documents">Project Documents</option>
+                        </select>
+                        <button type="submit">Upload PDF</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Calendar & Schedule Tab -->
+            <div id="calendar" class="tab-content">
+                <h3>Project Calendar & Schedule</h3>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button onclick="previousMonth()"><i class="fas fa-chevron-left"></i></button>
+                        <h4 id="currentMonth"></h4>
+                        <button onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h4>Upcoming Events</h4>
+                        <button class="edit-mode-btn" id="eventsEditBtn" onclick="toggleEditMode('events')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                    <div class="events-list" id="eventsList">
+                        <!-- Events will be dynamically loaded here -->
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn" id="addEventBtn" onclick="toggleAddEventSection()">
+                            <i class="fas fa-plus"></i> Add New Event
+                        </button>
+                    </div>
+                    
+                    <div class="add-event-section collapsible" id="addEventSection" style="display: none;">
+                        <div class="section-header">
+                            <h4>Add New Event</h4>
+                            <button class="close-btn" onclick="toggleAddEventSection()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <form id="addEventForm">
+                            <input type="text" id="eventTitle" placeholder="Event Title" required>
+                            <input type="date" id="eventDate" required>
+                            <input type="time" id="eventTime" placeholder="Event Time">
+                            <input type="text" id="eventLocation" placeholder="Event Location">
+                            <textarea id="eventDescription" placeholder="Event Description"></textarea>
+                            <button type="submit">Add Event</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Morph Chart Tab -->
+            <div id="morph" class="tab-content">
+                <h3>Morph Chart - Design Options Comparison</h3>
+                <div class="morph-chart-container">
+                    <div class="morph-controls">
+                        <button class="morph-btn" onclick="addMorphColumn()">
+                            <i class="fas fa-plus"></i> Add Column
+                        </button>
+                        <button class="morph-btn" onclick="addMorphRow()">
+                            <i class="fas fa-plus"></i> Add Function
+                        </button>
+                        <button class="morph-btn delete-btn" onclick="deleteMorphColumn()">
+                            <i class="fas fa-minus"></i> Delete Column
+                        </button>
+                        <button class="morph-btn delete-btn" onclick="deleteMorphRow()">
+                            <i class="fas fa-minus"></i> Delete Function
+                        </button>
+                        <button class="morph-btn" onclick="saveMorphChart()">
+                            <i class="fas fa-save"></i> Save Chart
+                        </button>
+                    </div>
+                    <div class="morph-table-container">
+                        <table class="morph-table" id="morphTable">
+                            <thead>
+                                <tr>
+                                    <th class="morph-header">FUNCTIONS</th>
+                                    <th class="morph-header">1</th>
+                                    <th class="morph-header">2</th>
+                                    <th class="morph-header">3</th>
+                                    <th class="morph-header">4</th>
+                                    <th class="morph-header">5</th>
+                                </tr>
+                            </thead>
+                            <tbody id="morphTableBody">
+                                <tr>
+                                    <td class="morph-function">Base/Chassis Material Selection</td>
+                                    <td class="morph-cell" contenteditable="true">Wood</td>
+                                    <td class="morph-cell" contenteditable="true">3D Printed</td>
+                                    <td class="morph-cell" contenteditable="true">Wood/3D Printed</td>
+                                    <td class="morph-cell" contenteditable="true">Styrofoam</td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                </tr>
+                                <tr>
+                                    <td class="morph-function">Truck Puller Material Selection</td>
+                                    <td class="morph-cell" contenteditable="true">Wood</td>
+                                    <td class="morph-cell" contenteditable="true">3D Printed</td>
+                                    <td class="morph-cell" contenteditable="true">Wood/3D Printed</td>
+                                    <td class="morph-cell" contenteditable="true">Styrofoam</td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                </tr>
+                                <tr>
+                                    <td class="morph-function">Innovative Features</td>
+                                    <td class="morph-cell" contenteditable="true">Bridge Structure</td>
+                                    <td class="morph-cell" contenteditable="true">Caravan Concept</td>
+                                    <td class="morph-cell" contenteditable="true">Plastics (Acrylic)</td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                </tr>
+                                <tr>
+                                    <td class="morph-function">Motors</td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                </tr>
+                                <tr>
+                                    <td class="morph-function">Solar Panel Configuration</td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                </tr>
+                                <tr>
+                                    <td class="morph-function">Drive Train Design</td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                </tr>
+                                <tr>
+                                    <td class="morph-function">Electrical Wiring</td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                    <td class="morph-cell" contenteditable="true"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="morph-notes">
+                        <h4>Design Notes</h4>
+                        <textarea id="morphNotes" placeholder="Add notes about design decisions, pros/cons, or additional considerations..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks & Progress Tab -->
+            <div id="tasks" class="tab-content">
+                <div class="tab-header">
+                    <h3>Tasks & Progress Tracking</h3>
+                    <button class="edit-mode-btn" id="tasksEditBtn" onclick="toggleEditMode('tasks')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+                <div class="tasks-container">
+                    <div class="task-category">
+                        <h4>Design Tasks</h4>
+                        <div class="task-list" id="designTasks">
+                            <!-- Tasks will be dynamically loaded here -->
+                        </div>
+                    </div>
+                    <div class="task-category">
+                        <h4>Procurement Tasks</h4>
+                        <div class="task-list" id="procurementTasks">
+                            <!-- Tasks will be dynamically loaded here -->
+                        </div>
+                    </div>
+                    <div class="task-category">
+                        <h4>Assembly Tasks</h4>
+                        <div class="task-list" id="assemblyTasks">
+                            <!-- Tasks will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="add-task-section">
+                    <h4>Add New Task</h4>
+                    <form id="addTaskForm">
+                        <input type="text" id="taskTitle" placeholder="Task Title" required>
+                        <select id="taskCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="design">Design Tasks</option>
+                            <option value="procurement">Procurement Tasks</option>
+                            <option value="assembly">Assembly Tasks</option>
+                            <option value="testing">Testing Tasks</option>
+                        </select>
+                        <button type="submit">Add Task</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Viewer Modal -->
+    <div id="pdfViewerModal" class="modal">
+        <div class="pdf-modal-content">
+            <div class="pdf-header">
+                <h3 id="pdfTitle">PDF Viewer</h3>
+                <div class="pdf-controls">
+                    <button class="pdf-control-btn" onclick="previousPage()" id="prevBtn" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span id="pageInfo">Page 1 of 1</span>
+                    <button class="pdf-control-btn" onclick="nextPage()" id="nextBtn" disabled>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="pdf-control-btn" onclick="zoomOut()" id="zoomOutBtn">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <span id="zoomLevel">100%</span>
+                    <button class="pdf-control-btn" onclick="zoomIn()" id="zoomInBtn">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button class="pdf-control-btn" onclick="downloadPDF()" id="downloadBtn">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="pdf-control-btn" onclick="closePDFViewer()" id="closeBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="pdf-container">
+                <div id="pdfCanvas" class="pdf-canvas"></div>
+                <div id="pdfLoading" class="pdf-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading PDF...</p>
+                </div>
+                <div id="pdfError" class="pdf-error" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error loading PDF. Please try again or download the file.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Sections -->
+    <section id="about" class="section">
+        <div class="container">
+            <h2>About Our Project</h2>
+            <p>We are a team of engineering students working on an innovative solar-powered truck project for DPST1071. Our goal is to design and build a sustainable and efficent vehicle that demonstrates the potential of solar energy in transportation.</p>
+        </div>
+    </section>
+
+    <section id="team" class="section">
+        <div class="container">
+            <h2>Our Team</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4>Ahmed</h4>
+                    <p>Lead</p>
+                </div>
+                <div class="team-member">
+                    <div class="member-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4>Sebastian</h4>
+                    <p>Secretary (Note Guy) & Electrical</p>
+                </div>
+                <div class="team-member">
+                    <div class="member-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4>Neha</h4>
+                    <p>Design/Mechanical</p>
+                </div>
+                <div class="team-member">
+                    <div class="member-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4>Shuoqi</h4>
+                    <p>Design/Mechanical</p>
+                </div>
+                <div class="team-member">
+                    <div class="member-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4>Rishikesh</h4>
+                    <p>Design/Mechanical & Electrical</p>
+                </div>
+                <div class="team-member" style = 'position:relative; left: 180%;'>
+                    <div class="member-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4>Yi Zheng</h4>
+                    <p>Design/Mechanical & Electrical</p>
+                </div>
+                <div class="team-member" style = 'position:relative; left: 180%;'>
+                    <div class="member-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4>Tsung Ying</h4>
+                    <p>Design/Mechanical & Electrical</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="vehicle" class="section">
+        <div class="container">
+            <h2>Our Solar Truck</h2>
+            <div class="vehicle-specs">
+                <div class="spec-item">
+                    <h4>Solar Panel Capacity</h4>
+                    <p>500W</p>
+                </div>
+                <div class="spec-item">
+                    <h4>Battery Capacity</h4>
+                    <p>2kWh</p>
+                </div>
+                <div class="spec-item">
+                    <h4>Motor Power</h4>
+                    <p>1kW</p>
+                </div>
+                <div class="spec-item">
+                    <h4>Range</h4>
+                    <p>50km</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Solar Truck Project - DPST1071. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
