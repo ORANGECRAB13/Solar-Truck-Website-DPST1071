@@ -5,8 +5,7 @@ let events = [];
 let tasks = [];
 let morphChartData = null;
 
-// Data synchronization - using repository data file
-const DATA_FILE_URL = 'data/solar-truck-data.json';
+// Simple Firebase data sync
 
 // PDF Viewer variables
 let pdfDoc = null;
@@ -41,6 +40,7 @@ let links = {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded - Script.js is working');
+    initializeFirebaseData();
     loadFromLocalStorage();
     initializeCalendar();
     renderEvents();
@@ -49,25 +49,53 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
 });
 
-// Load data from localStorage and repository
-async function loadFromLocalStorage() {
-    // First try to load from repository data file
-    try {
-        const response = await fetch(DATA_FILE_URL);
-        if (response.ok) {
-            const cloudData = await response.json();
-            if (cloudData.events) events = cloudData.events;
-            if (cloudData.tasks) tasks = cloudData.tasks;
-            if (cloudData.links) links = cloudData.links;
-            if (cloudData.morphChartData) morphChartData = cloudData.morphChartData;
-            console.log('Data loaded from repository');
-            return;
-        }
-    } catch (error) {
-        console.log('Could not load from repository, using localStorage');
+// Initialize Firebase data listeners
+function initializeFirebaseData() {
+    if (!window.db || !window.firebaseFunctions) {
+        console.log('Firebase not available, using localStorage only');
+        return;
     }
+
+    const { collection, onSnapshot, query, orderBy } = window.firebaseFunctions;
     
-    // Fallback to localStorage
+    // Set up real-time listeners for events
+    const eventsQuery = query(collection(window.db, 'events'), orderBy('date', 'asc'));
+    onSnapshot(eventsQuery, (snapshot) => {
+        events = [];
+        snapshot.forEach((doc) => {
+            events.push({ id: doc.id, ...doc.data() });
+        });
+        renderEvents();
+        renderCalendar();
+    });
+
+    // Set up real-time listeners for tasks
+    const tasksQuery = query(collection(window.db, 'tasks'), orderBy('category', 'asc'));
+    onSnapshot(tasksQuery, (snapshot) => {
+        tasks = [];
+        snapshot.forEach((doc) => {
+            tasks.push({ id: doc.id, ...doc.data() });
+        });
+        renderTasks();
+    });
+
+    // Set up real-time listener for links
+    const linksQuery = collection(window.db, 'links');
+    onSnapshot(linksQuery, (snapshot) => {
+        if (!snapshot.empty) {
+            const doc = snapshot.docs[0];
+            const firebaseLinks = doc.data();
+            links = firebaseLinks;
+            renderLinks();
+        } else {
+            // If no links in Firebase, save default links
+            saveLinksToFirebase();
+        }
+    });
+}
+
+// Load data from localStorage (fallback)
+function loadFromLocalStorage() {
     const savedEvents = localStorage.getItem('solarTruckEvents');
     const savedTasks = localStorage.getItem('solarTruckTasks');
     const savedLinks = localStorage.getItem('solarTruckLinks');
@@ -87,7 +115,7 @@ async function loadFromLocalStorage() {
     }
 }
 
-// Save data to localStorage and show instructions for cloud sync
+// Save data to localStorage (fallback)
 function saveToLocalStorage() {
     localStorage.setItem('solarTruckEvents', JSON.stringify(events));
     localStorage.setItem('solarTruckTasks', JSON.stringify(tasks));
@@ -95,29 +123,77 @@ function saveToLocalStorage() {
     if (morphChartData) {
         localStorage.setItem('solarTruckMorphChart', JSON.stringify(morphChartData));
     }
-    
-    // Show instructions for syncing across devices
-    showSyncInstructions();
 }
 
-// Show instructions for syncing data across devices
-function showSyncInstructions() {
-    const dataToSync = {
-        events: events,
-        tasks: tasks,
-        links: links,
-        morphChartData: morphChartData,
-        lastUpdated: new Date().toISOString()
-    };
-    
-    console.log('=== DATA SYNC INSTRUCTIONS ===');
-    console.log('To sync data across devices:');
-    console.log('1. Copy the data below');
-    console.log('2. Update the file: data/solar-truck-data.json');
-    console.log('3. Commit and push to GitHub');
-    console.log('4. Other devices will automatically load the updated data');
-    console.log('=== DATA TO SYNC ===');
-    console.log(JSON.stringify(dataToSync, null, 2));
+// Firebase save functions
+async function saveEventToFirebase(eventData) {
+    if (!window.db || !window.firebaseFunctions) {
+        return false;
+    }
+
+    try {
+        const { collection, addDoc, doc, updateDoc } = window.firebaseFunctions;
+        
+        if (eventData.id && eventData.id.toString().length > 10) {
+            // Update existing event
+            await updateDoc(doc(window.db, 'events', eventData.id), eventData);
+        } else {
+            // Add new event
+            await addDoc(collection(window.db, 'events'), eventData);
+        }
+        return true;
+    } catch (error) {
+        console.error('Error saving event to Firebase:', error);
+        return false;
+    }
+}
+
+async function saveTaskToFirebase(taskData) {
+    if (!window.db || !window.firebaseFunctions) {
+        return false;
+    }
+
+    try {
+        const { collection, addDoc, doc, updateDoc } = window.firebaseFunctions;
+        
+        if (taskData.id && taskData.id.toString().length > 10) {
+            // Update existing task
+            await updateDoc(doc(window.db, 'tasks', taskData.id), taskData);
+        } else {
+            // Add new task
+            await addDoc(collection(window.db, 'tasks'), taskData);
+        }
+        return true;
+    } catch (error) {
+        console.error('Error saving task to Firebase:', error);
+        return false;
+    }
+}
+
+async function saveLinksToFirebase() {
+    if (!window.db || !window.firebaseFunctions) {
+        return false;
+    }
+
+    try {
+        const { collection, addDoc, doc, updateDoc, getDocs } = window.firebaseFunctions;
+        
+        // Check if links already exist in Firebase
+        const linksSnapshot = await getDocs(collection(window.db, 'links'));
+        if (linksSnapshot.empty) {
+            // Create new document with default links
+            await addDoc(collection(window.db, 'links'), links);
+        } else {
+            // Update existing document
+            const docId = linksSnapshot.docs[0].id;
+            await updateDoc(doc(window.db, 'links', docId), links);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error saving links to Firebase:', error);
+        return false;
+    }
 }
 
 // Clear all data
@@ -509,10 +585,19 @@ async function addEvent() {
     // Clear form
     document.getElementById('addEventForm').reset();
     
-    // Save and render
-    saveToLocalStorage();
-    renderEvents();
-    renderCalendar();
+    // Try Firebase first, fallback to localStorage
+    const firebaseSuccess = await saveEventToFirebase(eventData);
+    
+    if (!firebaseSuccess) {
+        // Fallback to local storage
+        saveToLocalStorage();
+    }
+    
+    // Re-render (Firebase listeners will handle this automatically)
+    if (!firebaseSuccess) {
+        renderEvents();
+        renderCalendar();
+    }
     
     showNotification('Event saved successfully!');
     
@@ -609,8 +694,14 @@ function addTask() {
     
     document.getElementById('addTaskForm').reset();
     
-            saveToLocalStorage();
-    renderTasks();
+    // Try Firebase first, fallback to localStorage
+    const firebaseSuccess = await saveTaskToFirebase(taskData);
+    
+    if (!firebaseSuccess) {
+        // Fallback to local storage
+        saveToLocalStorage();
+        renderTasks();
+    }
     
     showNotification('Task added successfully!');
 }
@@ -731,9 +822,14 @@ async function addLink() {
         categoryElement.value = '';
     }
     
-    // Save and render
-    saveToLocalStorage();
-    renderLinks();
+    // Try Firebase first, fallback to localStorage
+    const firebaseSuccess = await saveLinksToFirebase();
+    
+    if (!firebaseSuccess) {
+        // Fallback to local storage
+        saveToLocalStorage();
+        renderLinks();
+    }
     
     // Show success message
     showNotification('Link added successfully!');
@@ -1065,29 +1161,6 @@ function setupEventListeners() {
     
     // Load morph chart
     loadMorphChart();
-}
-
-// Force reset links to repository PDFs
-function resetToRepositoryPDFs() {
-    console.log('Resetting links to repository PDFs...');
-    links = {
-        course: [
-            { title: "Concept Generation Guide", url: "pdfs/Concept Generation Guide.pdf" }
-        ],
-        technical: [
-            { title: "Capacitors and Motors", url: "pdfs/Capacitors and Motors.pdf" }
-        ],
-        communication: [],
-        external: [],
-        documents: [
-            { title: "Project Brief", url: "pdfs/Project Brief.pdf" }
-        ]
-    };
-    
-    saveToLocalStorage();
-    renderLinks();
-    showNotification('Links reset to repository PDFs!');
-    console.log('Links reset complete:', links);
 }
 
 // Emergency reset function - can be called from console
