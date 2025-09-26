@@ -203,7 +203,7 @@ async function saveLinksToFirebase() {
 }
 
 // Clear all data
-function clearAllData() {
+window.clearAllData = function() {
     if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
         localStorage.removeItem('solarTruckEvents');
         localStorage.removeItem('solarTruckTasks');
@@ -240,7 +240,7 @@ function clearAllData() {
 }
 
 // User management
-function saveUserName() {
+window.saveUserName = function() {
     const userName = document.getElementById('userName').value.trim();
     if (userName) {
         currentUser = userName;
@@ -266,7 +266,7 @@ function openPDFViewer(pdfUrl, title) {
     loadPDF(pdfUrl);
 }
 
-function closePDFViewer() {
+window.closePDFViewer = function() {
     document.getElementById('pdfModal').style.display = 'none';
     pdfDoc = null;
     currentPage = 1;
@@ -324,7 +324,7 @@ function renderPage(pageNum) {
     });
 }
 
-function previousPage() {
+window.previousPage = function() {
     if (currentPage > 1) {
         currentPage--;
         renderPage(currentPage);
@@ -333,7 +333,7 @@ function previousPage() {
     }
 }
 
-function nextPage() {
+window.nextPage = function() {
     if (currentPage < totalPages) {
         currentPage++;
         renderPage(currentPage);
@@ -342,13 +342,13 @@ function nextPage() {
     }
 }
 
-function zoomIn() {
+window.zoomIn = function() {
     currentZoom = Math.min(currentZoom * 1.2, 3.0);
     renderPage(currentPage);
     updateZoomLevel();
 }
 
-function zoomOut() {
+window.zoomOut = function() {
     currentZoom = Math.max(currentZoom / 1.2, 0.5);
     renderPage(currentPage);
     updateZoomLevel();
@@ -367,7 +367,7 @@ function updateZoomLevel() {
     document.getElementById('pdfZoomLevel').textContent = Math.round(currentZoom * 100) + '%';
 }
 
-function downloadPDF() {
+window.downloadPDF = function() {
     if (currentPDFUrl) {
         const link = document.createElement('a');
         link.href = currentPDFUrl;
@@ -493,12 +493,12 @@ function showDayEvents(dateString) {
 }
 
 // Calendar navigation functions
-function previousMonth() {
+window.previousMonth = function() {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendar();
 }
 
-function nextMonth() {
+window.nextMonth = function() {
     currentDate.setMonth(currentDate.getMonth() + 1);
     renderCalendar();
 }
@@ -904,7 +904,7 @@ async function uploadPDF() {
 }
 
 // Collapsible Section Functions
-function toggleAddLinkSection() {
+window.toggleAddLinkSection = function() {
     const section = document.getElementById('addLinkSection');
     const button = document.getElementById('addLinkBtn');
     
@@ -925,7 +925,7 @@ function toggleAddLinkSection() {
     }
 }
 
-function toggleUploadPDFSection() {
+window.toggleUploadPDFSection = function() {
     const section = document.getElementById('uploadPDFSection');
     const button = document.getElementById('uploadPDFBtn');
     
@@ -946,7 +946,7 @@ function toggleUploadPDFSection() {
     }
 }
 
-function toggleAddEventSection() {
+window.toggleAddEventSection = function() {
     const section = document.getElementById('addEventSection');
     const button = document.getElementById('addEventBtn');
     
@@ -967,8 +967,8 @@ function toggleAddEventSection() {
         }
     }
 }
-// Modal Functions
-function openProjectHub() {
+// Modal Functions - Attached to window for global access
+window.openProjectHub = function() {
     document.getElementById('projectHub').style.display = 'block';
     // Initialize the first tab by directly showing it
     const tabContents = document.querySelectorAll('.tab-content');
@@ -990,14 +990,14 @@ function openProjectHub() {
     renderEvents();
     renderTasks();
     renderLinks();
-}
+};
 
-function closeProjectHub() {
+window.closeProjectHub = function() {
     document.getElementById('projectHub').style.display = 'none';
-}
+};
 
-// Tab Functions
-function openTab(event, tabName) {
+// Tab Functions - Attached to window for global access
+window.openTab = function(event, tabName) {
     // Hide all tab contents
     const tabContents = document.querySelectorAll('.tab-content');
     tabContents.forEach(content => {
@@ -1056,7 +1056,7 @@ function loadMorphChart() {
     }
 }
 
-function saveMorphChart() {
+window.saveMorphChart = function() {
         const table = document.getElementById('morphTable');
         const notes = document.getElementById('morphNotes').value;
         
@@ -1080,6 +1080,76 @@ function saveMorphChart() {
     morphChartData = morphData;
     saveToLocalStorage();
     showNotification('Morph chart saved successfully!');
+}
+
+// Morph Chart Functions
+window.addMorphColumn = function() {
+    const table = document.getElementById('morphTable');
+    const headerRow = table.querySelector('thead tr');
+    const bodyRows = table.querySelectorAll('tbody tr');
+    
+    // Add header
+    const newHeader = document.createElement('th');
+    newHeader.className = 'morph-header';
+    newHeader.textContent = headerRow.children.length;
+    headerRow.appendChild(newHeader);
+    
+    // Add cells to each row
+    bodyRows.forEach(row => {
+        const newCell = document.createElement('td');
+        newCell.className = 'morph-cell';
+        newCell.contentEditable = 'true';
+        row.appendChild(newCell);
+    });
+}
+
+window.addMorphRow = function() {
+    const table = document.getElementById('morphTable');
+    const tbody = table.querySelector('tbody');
+    const headerCount = table.querySelector('thead tr').children.length;
+    
+    const newRow = document.createElement('tr');
+    const functionCell = document.createElement('td');
+    functionCell.className = 'morph-function';
+    functionCell.contentEditable = 'true';
+    functionCell.textContent = 'New Function';
+    newRow.appendChild(functionCell);
+    
+    for (let i = 1; i < headerCount; i++) {
+        const newCell = document.createElement('td');
+        newCell.className = 'morph-cell';
+        newCell.contentEditable = 'true';
+        newRow.appendChild(newCell);
+    }
+    
+    tbody.appendChild(newRow);
+}
+
+window.deleteMorphColumn = function() {
+    const table = document.getElementById('morphTable');
+    const headerRow = table.querySelector('thead tr');
+    const bodyRows = table.querySelectorAll('tbody tr');
+    
+    if (headerRow.children.length > 2) {
+        // Remove last header
+        headerRow.removeChild(headerRow.lastChild);
+        
+        // Remove last cell from each row
+        bodyRows.forEach(row => {
+            if (row.children.length > 1) {
+                row.removeChild(row.lastChild);
+            }
+        });
+    }
+}
+
+window.deleteMorphRow = function() {
+    const tbody = document.getElementById('morphTable').querySelector('tbody');
+    const rows = tbody.querySelectorAll('tr');
+    
+    if (rows.length > 1) {
+        tbody.removeChild(rows[rows.length - 1]);
+    }
 }
 
 // Notification system
