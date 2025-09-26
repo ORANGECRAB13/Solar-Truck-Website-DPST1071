@@ -5,6 +5,9 @@ let events = [];
 let tasks = [];
 let morphChartData = null;
 
+// Data synchronization - using repository data file
+const DATA_FILE_URL = 'data/solar-truck-data.json';
+
 // PDF Viewer variables
 let pdfDoc = null;
 let currentPage = 1;
@@ -20,7 +23,7 @@ let editMode = {
     tasks: false
 };
 
-// Default links with PDFs stored in the repository
+// Default links with only your actual PDFs
 let links = {
     course: [
         { title: "Concept Generation Guide", url: "pdfs/Concept Generation Guide.pdf" }
@@ -28,15 +31,8 @@ let links = {
     technical: [
         { title: "Capacitors and Motors", url: "pdfs/Capacitors and Motors.pdf" }
     ],
-    communication: [
-        { title: "Discord Server", url: "https://discord.gg/example" },
-        { title: "Slack Workspace", url: "https://slack.com/example" },
-        { title: "Google Drive", url: "https://drive.google.com/example" }
-    ],
-    external: [
-        { title: "Solar Car Competitions", url: "https://www.worldsolarchallenge.org/" },
-        { title: "Engineering Forums", url: "https://www.engineering.com/" }
-    ],
+    communication: [],
+    external: [],
     documents: [
         { title: "Project Brief", url: "pdfs/Project Brief.pdf" }
     ]
@@ -53,8 +49,25 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
 });
 
-// Load data from localStorage
-function loadFromLocalStorage() {
+// Load data from localStorage and repository
+async function loadFromLocalStorage() {
+    // First try to load from repository data file
+    try {
+        const response = await fetch(DATA_FILE_URL);
+        if (response.ok) {
+            const cloudData = await response.json();
+            if (cloudData.events) events = cloudData.events;
+            if (cloudData.tasks) tasks = cloudData.tasks;
+            if (cloudData.links) links = cloudData.links;
+            if (cloudData.morphChartData) morphChartData = cloudData.morphChartData;
+            console.log('Data loaded from repository');
+            return;
+        }
+    } catch (error) {
+        console.log('Could not load from repository, using localStorage');
+    }
+    
+    // Fallback to localStorage
     const savedEvents = localStorage.getItem('solarTruckEvents');
     const savedTasks = localStorage.getItem('solarTruckTasks');
     const savedLinks = localStorage.getItem('solarTruckLinks');
@@ -74,7 +87,7 @@ function loadFromLocalStorage() {
     }
 }
 
-// Save data to localStorage
+// Save data to localStorage and show instructions for cloud sync
 function saveToLocalStorage() {
     localStorage.setItem('solarTruckEvents', JSON.stringify(events));
     localStorage.setItem('solarTruckTasks', JSON.stringify(tasks));
@@ -82,6 +95,29 @@ function saveToLocalStorage() {
     if (morphChartData) {
         localStorage.setItem('solarTruckMorphChart', JSON.stringify(morphChartData));
     }
+    
+    // Show instructions for syncing across devices
+    showSyncInstructions();
+}
+
+// Show instructions for syncing data across devices
+function showSyncInstructions() {
+    const dataToSync = {
+        events: events,
+        tasks: tasks,
+        links: links,
+        morphChartData: morphChartData,
+        lastUpdated: new Date().toISOString()
+    };
+    
+    console.log('=== DATA SYNC INSTRUCTIONS ===');
+    console.log('To sync data across devices:');
+    console.log('1. Copy the data below');
+    console.log('2. Update the file: data/solar-truck-data.json');
+    console.log('3. Commit and push to GitHub');
+    console.log('4. Other devices will automatically load the updated data');
+    console.log('=== DATA TO SYNC ===');
+    console.log(JSON.stringify(dataToSync, null, 2));
 }
 
 // Clear all data
@@ -94,7 +130,7 @@ function clearAllData() {
         
         events = [];
         tasks = [];
-        // Reset to default links with repository PDFs
+        // Reset to default links with only your actual PDFs
         links = {
             course: [
                 { title: "Concept Generation Guide", url: "pdfs/Concept Generation Guide.pdf" }
@@ -102,15 +138,8 @@ function clearAllData() {
             technical: [
                 { title: "Capacitors and Motors", url: "pdfs/Capacitors and Motors.pdf" }
             ],
-            communication: [
-                { title: "Discord Server", url: "https://discord.gg/example" },
-                { title: "Slack Workspace", url: "https://slack.com/example" },
-                { title: "Google Drive", url: "https://drive.google.com/example" }
-            ],
-            external: [
-                { title: "Solar Car Competitions", url: "https://www.worldsolarchallenge.org/" },
-                { title: "Engineering Forums", url: "https://www.engineering.com/" }
-            ],
+            communication: [],
+            external: [],
             documents: [
                 { title: "Project Brief", url: "pdfs/Project Brief.pdf" }
             ]
@@ -1048,15 +1077,8 @@ function resetToRepositoryPDFs() {
         technical: [
             { title: "Capacitors and Motors", url: "pdfs/Capacitors and Motors.pdf" }
         ],
-        communication: [
-            { title: "Discord Server", url: "https://discord.gg/example" },
-            { title: "Slack Workspace", url: "https://slack.com/example" },
-            { title: "Google Drive", url: "https://drive.google.com/example" }
-        ],
-        external: [
-            { title: "Solar Car Competitions", url: "https://www.worldsolarchallenge.org/" },
-            { title: "Engineering Forums", url: "https://www.engineering.com/" }
-        ],
+        communication: [],
+        external: [],
         documents: [
             { title: "Project Brief", url: "pdfs/Project Brief.pdf" }
         ]

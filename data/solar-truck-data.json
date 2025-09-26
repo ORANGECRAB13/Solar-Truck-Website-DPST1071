@@ -1,0 +1,19 @@
+{
+  "events": [],
+  "tasks": [],
+  "links": {
+    "course": [
+      { "title": "Concept Generation Guide", "url": "pdfs/Concept Generation Guide.pdf" }
+    ],
+    "technical": [
+      { "title": "Capacitors and Motors", "url": "pdfs/Capacitors and Motors.pdf" }
+    ],
+    "communication": [],
+    "external": [],
+    "documents": [
+      { "title": "Project Brief", "url": "pdfs/Project Brief.pdf" }
+    ]
+  },
+  "morphChartData": null,
+  "lastUpdated": "2025-01-26T00:00:00.000Z"
+}
