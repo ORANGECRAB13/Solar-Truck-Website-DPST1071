@@ -62,10 +62,13 @@
                 </ul>
             </nav>
             <div class="debug-controls">
-                <button onclick="testFirebaseConnection()" class="debug-btn" title="Test Firebase Connection">
+                <button onclick="if(typeof testScriptLoaded === 'function') testScriptLoaded(); else alert('Script not loaded');" class="debug-btn" title="Test Script Loading">
+                    <i class="fas fa-code"></i>
+                </button>
+                <button onclick="if(typeof testFirebaseConnection === 'function') testFirebaseConnection(); else alert('Function not loaded yet');" class="debug-btn" title="Test Firebase Connection">
                     <i class="fas fa-wifi"></i>
                 </button>
-                <button onclick="clearFirebaseDatabase()" class="debug-btn" title="Clear Database (Debug)">
+                <button onclick="if(typeof clearFirebaseDatabase === 'function') clearFirebaseDatabase(); else alert('Function not loaded yet');" class="debug-btn" title="Clear Database (Debug)">
                     <i class="fas fa-database"></i>
                 </button>
             </div>
