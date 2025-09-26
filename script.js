@@ -89,21 +89,32 @@ function loadUserData() {
 }
 
 function initializeFirebaseData() {
+    console.log('Initializing Firebase data...');
+    console.log('window.db:', window.db);
+    console.log('window.firebaseFunctions:', window.firebaseFunctions);
+    
     if (!window.db || !window.firebaseFunctions) {
         console.log('Firebase not available, using local storage');
         return;
     }
+    
+    console.log('Firebase is available, setting up listeners...');
 
     const { collection, onSnapshot, query, orderBy } = window.firebaseFunctions;
     
     // Set up real-time listeners for events
     const eventsQuery = query(collection(window.db, 'events'), orderBy('date', 'asc'));
     onSnapshot(eventsQuery, (snapshot) => {
+        console.log('Events snapshot received:', snapshot.size, 'documents');
         events = [];
         snapshot.forEach((doc) => {
+            console.log('Event document:', doc.id, doc.data());
             events.push({ id: doc.id, ...doc.data() });
         });
+        console.log('Events array after Firebase update:', events);
         renderEvents();
+    }, (error) => {
+        console.error('Error in events listener:', error);
     });
 
     // Set up real-time listeners for tasks
@@ -119,12 +130,15 @@ function initializeFirebaseData() {
     // Set up real-time listener for links
     const linksQuery = collection(window.db, 'links');
     onSnapshot(linksQuery, (snapshot) => {
+        console.log('Links snapshot received:', snapshot.size, 'documents');
         if (!snapshot.empty) {
             const doc = snapshot.docs[0];
             const firebaseLinks = doc.data();
+            console.log('Firebase links data:', firebaseLinks);
             links = firebaseLinks;
             renderLinks();
         } else {
+            console.log('No links in Firebase, starting with empty links');
             // If no links in Firebase, start with empty links
             links = {
                 course: [],
@@ -135,6 +149,8 @@ function initializeFirebaseData() {
             };
             renderLinks();
         }
+    }, (error) => {
+        console.error('Error in links listener:', error);
     });
 
     // Set up real-time listener for morph chart
@@ -206,12 +222,17 @@ async function updateTaskInFirebase(taskId, updates) {
 }
 
 async function saveLinksToFirebase() {
+    console.log('Attempting to save links to Firebase...');
+    console.log('Links to save:', links);
+    
     if (!window.db || !window.firebaseFunctions) {
+        console.log('Firebase not available for saving links');
         return false;
     }
 
     try {
         const { collection, addDoc, doc, updateDoc, getDocs } = window.firebaseFunctions;
+        console.log('Firebase functions available for saving links');
         
         // Check if links already exist in Firebase
         const linksSnapshot = await getDocs(collection(window.db, 'links'));
@@ -1528,15 +1549,59 @@ function resetLinksToDefaults() {
     location.reload();
 }
 
+// Test Firebase connection
+async function testFirebaseConnection() {
+    console.log('Testing Firebase connection...');
+    console.log('window.db:', window.db);
+    console.log('window.firebaseFunctions:', window.firebaseFunctions);
+    
+    if (!window.db || !window.firebaseFunctions) {
+        console.log('❌ Firebase not available');
+        showNotification('❌ Firebase not available - check console');
+        return false;
+    }
+    
+    try {
+        const { collection, addDoc, getDocs } = window.firebaseFunctions;
+        
+        // Try to add a test document
+        const testDoc = await addDoc(collection(window.db, 'test'), {
+            message: 'Firebase connection test',
+            timestamp: new Date().toISOString()
+        });
+        
+        console.log('✅ Firebase connection successful! Test document ID:', testDoc.id);
+        showNotification('✅ Firebase connection successful!');
+        
+        // Clean up test document
+        const testSnapshot = await getDocs(collection(window.db, 'test'));
+        testSnapshot.forEach(async (doc) => {
+            await deleteDoc(doc.ref);
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Firebase connection failed:', error);
+        showNotification('❌ Firebase connection failed - check console');
+        return false;
+    }
+}
+
 // Clear Firebase database (for testing)
 async function clearFirebaseDatabase() {
+    console.log('Attempting to clear Firebase database...');
+    console.log('window.db:', window.db);
+    console.log('window.firebaseFunctions:', window.firebaseFunctions);
+    
     if (!window.db || !window.firebaseFunctions) {
         console.log('Firebase not available');
+        showNotification('Firebase not available - check console for details');
         return;
     }
 
     try {
         const { collection, getDocs, deleteDoc } = window.firebaseFunctions;
+        console.log('Firebase functions available, proceeding with clear...');
         
         // Clear events
         const eventsSnapshot = await getDocs(collection(window.db, 'events'));
