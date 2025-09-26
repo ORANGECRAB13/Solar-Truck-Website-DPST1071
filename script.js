@@ -307,12 +307,12 @@ function initializeCalendar() {
 }
 
 function renderCalendar() {
-    const calendar = document.getElementById('calendar');
-    if (!calendar) return;
+    const calendarGrid = document.getElementById('calendarGrid');
+    const currentMonthElement = document.getElementById('currentMonth');
+    if (!calendarGrid) return;
     
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
     
     const firstDay = new Date(currentYear, currentMonth, 1);
     const lastDay = new Date(currentYear, currentMonth + 1, 0);
@@ -324,18 +324,19 @@ function renderCalendar() {
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
     
+    // Update the month display
+    if (currentMonthElement) {
+        currentMonthElement.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    }
+    
     let calendarHTML = `
-        <div class="calendar-header">
-            <h3>${monthNames[currentMonth]} ${currentYear}</h3>
-        </div>
-        <div class="calendar-grid">
-            <div class="calendar-day-header">Sun</div>
-            <div class="calendar-day-header">Mon</div>
-            <div class="calendar-day-header">Tue</div>
-            <div class="calendar-day-header">Wed</div>
-            <div class="calendar-day-header">Thu</div>
-            <div class="calendar-day-header">Fri</div>
-            <div class="calendar-day-header">Sat</div>
+        <div class="calendar-day-header">Sun</div>
+        <div class="calendar-day-header">Mon</div>
+        <div class="calendar-day-header">Tue</div>
+        <div class="calendar-day-header">Wed</div>
+        <div class="calendar-day-header">Thu</div>
+        <div class="calendar-day-header">Fri</div>
+        <div class="calendar-day-header">Sat</div>
     `;
     
     // Add empty cells for days before the first day of the month
@@ -359,8 +360,7 @@ function renderCalendar() {
         `;
     }
     
-    calendarHTML += '</div>';
-    calendar.innerHTML = calendarHTML;
+    calendarGrid.innerHTML = calendarHTML;
 }
 
 function getEventsOnDate(dateString) {
@@ -650,9 +650,6 @@ function renderLinks() {
                         
                         return `<li>
                             <a href="${link.url}" target="_blank">${link.title}</a>
-                            ${isPDF ? `<a href="#" class="pdf-link" onclick="openPDFViewer('${link.url}', '${link.title}'); return false;" title="View PDF">
-                                <i class="fas fa-eye"></i> View PDF
-                            </a>` : ''}
                             ${deleteButton}
                         </li>`;
                     }).join('')}
@@ -894,6 +891,9 @@ function openTab(event, tabName) {
         renderEvents();
         renderTasks();
         renderLinks();
+    } else if (tabName === 'calendar') {
+        renderCalendar();
+        renderEvents();
     }
 }
 
