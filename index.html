@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com;">
     <title>Solar Truck Project - DPST1071</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -111,7 +112,7 @@
             <h2>Project Hub</h2>
             <div class="user-identification">
                 <label for="userName">Your Name:</label>
-                <input type="text" id="userName" placeholder="Enter your name" value="">
+                <input type="text" id="userName" placeholder="Enter your name" value="" autocomplete="name">
                 <button onclick="saveUserName()" class="user-save-btn">Save</button>
             </div>
             <div class="hub-tabs">
@@ -149,8 +150,8 @@
                         </button>
                     </div>
                     <form id="addLinkForm">
-                        <input type="text" id="linkTitle" placeholder="Link Title" required>
-                        <input type="url" id="linkUrl" placeholder="URL" required>
+                        <input type="text" id="linkTitle" placeholder="Link Title" required autocomplete="off">
+                        <input type="url" id="linkUrl" placeholder="URL" required autocomplete="url">
                         <select id="linkCategory" required>
                             <option value="">Select Category</option>
                             <option value="course">Course Materials</option>
@@ -171,7 +172,7 @@
                         </button>
                     </div>
                     <form id="uploadPDFForm">
-                        <input type="text" id="pdfTitle" placeholder="Document Title" required>
+                        <input type="text" id="pdfTitle" placeholder="Document Title" required autocomplete="off">
                         <input type="file" id="pdfFile" accept=".pdf" required>
                         <select id="pdfCategory" required>
                             <option value="">Select Category</option>
@@ -222,10 +223,10 @@
                             </button>
                         </div>
                         <form id="addEventForm">
-                            <input type="text" id="eventTitle" placeholder="Event Title" required>
-                            <input type="date" id="eventDate" required>
-                            <input type="time" id="eventTime" placeholder="Event Time">
-                            <input type="text" id="eventLocation" placeholder="Event Location">
+                            <input type="text" id="eventTitle" placeholder="Event Title" required autocomplete="off">
+                            <input type="date" id="eventDate" required autocomplete="off">
+                            <input type="time" id="eventTime" placeholder="Event Time" autocomplete="off">
+                            <input type="text" id="eventLocation" placeholder="Event Location" autocomplete="off">
                             <textarea id="eventDescription" placeholder="Event Description"></textarea>
                             <button type="submit">Add Event</button>
                         </form>
@@ -364,7 +365,7 @@
                 <div class="add-task-section">
                     <h4>Add New Task</h4>
                     <form id="addTaskForm">
-                        <input type="text" id="taskTitle" placeholder="Task Title" required>
+                        <input type="text" id="taskTitle" placeholder="Task Title" required autocomplete="off">
                         <select id="taskCategory" required>
                             <option value="">Select Category</option>
                             <option value="design">Design Tasks</option>
