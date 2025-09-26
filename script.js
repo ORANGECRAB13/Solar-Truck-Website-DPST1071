@@ -967,7 +967,6 @@ function toggleAddEventSection() {
         }
     }
 }
-
 // Modal Functions
 function openProjectHub() {
     document.getElementById('projectHub').style.display = 'block';
