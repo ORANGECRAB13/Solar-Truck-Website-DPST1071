@@ -681,7 +681,7 @@ function renderTasks() {
     });
 }
 
-function addTask() {
+async function addTask() {
     const title = document.getElementById('taskTitle').value;
     const category = document.getElementById('taskCategory').value;
     
@@ -690,13 +690,15 @@ function addTask() {
         return;
     }
     
-    tasks.push({
+    const taskData = {
         id: Date.now(),
         title: title,
         category: category,
         completed: false,
         createdBy: currentUser || 'Anonymous'
-    });
+    };
+    
+    tasks.push(taskData);
     
     document.getElementById('addTaskForm').reset();
     
