@@ -990,6 +990,7 @@ function setupEventListeners() {
 
 // Force reset links to repository PDFs
 function resetToRepositoryPDFs() {
+    console.log('Resetting links to repository PDFs...');
     links = {
         course: [
             { title: "Concept Generation Guide", url: "pdfs/Concept Generation Guide.pdf" }
@@ -1014,6 +1015,13 @@ function resetToRepositoryPDFs() {
     saveToLocalStorage();
     renderLinks();
     showNotification('Links reset to repository PDFs!');
+    console.log('Links reset complete:', links);
+}
+
+// Emergency reset function - can be called from console
+function emergencyReset() {
+    localStorage.removeItem('solarTruckLinks');
+    location.reload();
 }
 
 // Initialize PDF.js
