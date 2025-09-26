@@ -41,11 +41,24 @@
             query,
             orderBy
         };
+    </script>
+    
+    <!-- Load main script after Firebase is ready -->
+    <script>
+        // Wait for Firebase to be ready, then load the main script
+        function loadMainScript() {
+            if (window.db && window.firebaseFunctions) {
+                const script = document.createElement('script');
+                script.src = 'script.js?v=4';
+                document.head.appendChild(script);
+            } else {
+                // Retry after a short delay
+                setTimeout(loadMainScript, 100);
+            }
+        }
         
-        // Load the main script after Firebase is ready
-        const script = document.createElement('script');
-        script.src = 'script.js?v=4';
-        document.head.appendChild(script);
+        // Start loading the main script
+        loadMainScript();
     </script>
     
     <!-- PDF.js Library -->
