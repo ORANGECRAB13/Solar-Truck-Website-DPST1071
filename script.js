@@ -5,6 +5,13 @@ let events = [];
 let tasks = [];
 let morphChartData = null;
 
+// Test function to verify script is loaded
+function testScriptLoaded() {
+    console.log('✅ Script.js is loaded and working!');
+    alert('✅ Script.js is loaded and working!');
+    return true;
+}
+
 // PDF Viewer variables
 let pdfDoc = null;
 let currentPage = 1;
@@ -1122,6 +1129,14 @@ function loadFromLocalStorage() {
 
 // Load data on page load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Script.js is working');
+    console.log('Available functions:', {
+        testFirebaseConnection: typeof testFirebaseConnection,
+        clearFirebaseDatabase: typeof clearFirebaseDatabase,
+        addEvent: typeof addEvent,
+        addLink: typeof addLink
+    });
+    
     loadFromLocalStorage();
     initializeCalendar();
     renderEvents();
