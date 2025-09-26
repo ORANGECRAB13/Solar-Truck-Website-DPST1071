@@ -558,11 +558,14 @@ function renderEvents() {
 }
 
 async function addEvent() {
+    console.log('addEvent function called');
     const title = document.getElementById('eventTitle').value;
     const date = document.getElementById('eventDate').value;
     const time = document.getElementById('eventTime').value;
     const location = document.getElementById('eventLocation').value;
     const description = document.getElementById('eventDescription').value;
+    
+    console.log('Event data:', { title, date, time, location, description });
     
     if (!title || !date) {
         showNotification('Please fill in at least the title and date.');
@@ -1205,7 +1208,13 @@ function setupEventListeners() {
     if (addEventForm) {
         addEventForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            addEvent();
+            console.log('Event form submitted');
+            try {
+                addEvent();
+            } catch (error) {
+                console.error('Error adding event:', error);
+                showNotification('Error adding event: ' + error.message);
+            }
         });
     }
     
@@ -1213,7 +1222,13 @@ function setupEventListeners() {
     if (addTaskForm) {
         addTaskForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            addTask();
+            console.log('Task form submitted');
+            try {
+                addTask();
+            } catch (error) {
+                console.error('Error adding task:', error);
+                showNotification('Error adding task: ' + error.message);
+            }
         });
     }
     
@@ -1221,7 +1236,13 @@ function setupEventListeners() {
     if (addLinkForm) {
         addLinkForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            addLink();
+            console.log('Link form submitted');
+            try {
+                addLink();
+            } catch (error) {
+                console.error('Error adding link:', error);
+                showNotification('Error adding link: ' + error.message);
+            }
         });
     }
     
