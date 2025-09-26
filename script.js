@@ -1,30 +1,7 @@
 // Global variables
 let currentDate = new Date();
 let currentUser = '';
-let events = [
-    {
-        id: 1,
-        title: "Project Kickoff Meeting",
-        date: "2025-01-15",
-        time: "10:00",
-        location: "Engineering Building Room 101",
-        description: "Initial team meeting and project planning"
-    },
-    {
-        id: 2,
-        title: "Design Review",
-        date: "2025-01-22",
-        time: "14:00",
-        location: "Design Lab",
-        description: "Present initial solar truck design concepts"
-    },
-    {
-        id: 3,
-        title: "Component Procurement",
-        date: "2025-02-05",
-        description: "Order solar panels and motor components"
-    }
-];
+let events = [];
 let tasks = [];
 let morphChartData = null;
 
@@ -58,33 +35,11 @@ const defaultTasks = [
 ];
 
 let links = {
-    course: [
-        { title: "DPST1071 Course Outline", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-        { title: "Assignment Guidelines", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-        { title: "Project Requirements", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
-    ],
-    technical: [
-        { title: "Solar Panel Specifications", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-        { title: "Battery System Design", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-        { title: "Motor Controller Documentation", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
-    ],
-    communication: [
-        { title: "Discord Server", url: "https://discord.gg/example" },
-        { title: "Slack Workspace", url: "https://slack.com/example" },
-        { title: "Google Drive", url: "https://drive.google.com/example" }
-    ],
-    external: [
-        { title: "Solar Car Competitions", url: "https://www.worldsolarchallenge.org/" },
-        { title: "Engineering Forums", url: "https://www.engineering.com/" },
-        { title: "Research Papers", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
-    ],
-    documents: [
-        { title: "Project Proposal", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-        { title: "Technical Specifications", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-        { title: "Safety Guidelines", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-        { title: "Design Documents", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-        { title: "Progress Reports", url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
-    ]
+    course: [],
+    technical: [],
+    communication: [],
+    external: [],
+    documents: []
 };
 
 // Initialize the application
@@ -170,8 +125,15 @@ function initializeFirebaseData() {
             links = firebaseLinks;
             renderLinks();
         } else {
-            // If no links in Firebase, save default links
-            saveLinksToFirebase();
+            // If no links in Firebase, start with empty links
+            links = {
+                course: [],
+                technical: [],
+                communication: [],
+                external: [],
+                documents: []
+            };
+            renderLinks();
         }
     });
 
@@ -1134,9 +1096,6 @@ function loadFromLocalStorage() {
     }
     if (savedLinks) {
         links = JSON.parse(savedLinks);
-    } else {
-        // If no saved links, save the default links to localStorage
-        saveToLocalStorage();
     }
 }
 
@@ -1567,6 +1526,54 @@ function isEditModeActive(section) {
 function resetLinksToDefaults() {
     localStorage.removeItem('solarTruckLinks');
     location.reload();
+}
+
+// Clear Firebase database (for testing)
+async function clearFirebaseDatabase() {
+    if (!window.db || !window.firebaseFunctions) {
+        console.log('Firebase not available');
+        return;
+    }
+
+    try {
+        const { collection, getDocs, deleteDoc } = window.firebaseFunctions;
+        
+        // Clear events
+        const eventsSnapshot = await getDocs(collection(window.db, 'events'));
+        eventsSnapshot.forEach(async (doc) => {
+            await deleteDoc(doc.ref);
+        });
+        
+        // Clear tasks
+        const tasksSnapshot = await getDocs(collection(window.db, 'tasks'));
+        tasksSnapshot.forEach(async (doc) => {
+            await deleteDoc(doc.ref);
+        });
+        
+        // Clear links
+        const linksSnapshot = await getDocs(collection(window.db, 'links'));
+        linksSnapshot.forEach(async (doc) => {
+            await deleteDoc(doc.ref);
+        });
+        
+        // Clear morph chart
+        const morphSnapshot = await getDocs(collection(window.db, 'morphChart'));
+        morphSnapshot.forEach(async (doc) => {
+            await deleteDoc(doc.ref);
+        });
+        
+        console.log('Firebase database cleared successfully');
+        showNotification('Database cleared successfully!');
+        
+        // Reload the page to start fresh
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Error clearing Firebase database:', error);
+        showNotification('Error clearing database');
+    }
 }
 
 // Collapsible Section Functions
