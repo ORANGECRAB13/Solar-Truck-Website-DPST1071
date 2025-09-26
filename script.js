@@ -7,6 +7,12 @@ let morphChartData = null;
 
 // Simple Firebase data sync
 
+// Test function to verify script is loaded
+function testScriptLoaded() {
+    console.log('✅ Script.js is loaded and working!');
+    return true;
+}
+
 // PDF Viewer variables
 let pdfDoc = null;
 let currentPage = 1;
