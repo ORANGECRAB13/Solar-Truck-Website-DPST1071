@@ -1183,6 +1183,8 @@ function showNotification(message) {
 
 // Event Listeners
 function setupEventListeners() {
+    console.log('Setting up event listeners...');
+    
     // PDF Modal close
     const pdfModal = document.getElementById('pdfModal');
     if (pdfModal) {
@@ -1191,6 +1193,9 @@ function setupEventListeners() {
                 closePDFViewer();
             }
         });
+        console.log('PDF modal event listener attached');
+    } else {
+        console.error('PDF modal not found!');
     }
     
     // Project Hub Modal close
@@ -1201,6 +1206,9 @@ function setupEventListeners() {
                 closeProjectHub();
             }
         });
+        console.log('Project Hub modal event listener attached');
+    } else {
+        console.error('Project Hub modal not found!');
     }
     
     // Form submissions
@@ -1216,6 +1224,9 @@ function setupEventListeners() {
                 showNotification('Error adding event: ' + error.message);
             }
         });
+        console.log('Event form event listener attached');
+    } else {
+        console.error('Event form not found!');
     }
     
     const addTaskForm = document.getElementById('addTaskForm');
@@ -1230,6 +1241,9 @@ function setupEventListeners() {
                 showNotification('Error adding task: ' + error.message);
             }
         });
+        console.log('Task form event listener attached');
+    } else {
+        console.error('Task form not found!');
     }
     
     const addLinkForm = document.getElementById('addLinkForm');
@@ -1244,6 +1258,9 @@ function setupEventListeners() {
                 showNotification('Error adding link: ' + error.message);
             }
         });
+        console.log('Link form event listener attached');
+    } else {
+        console.error('Link form not found!');
     }
     
     const uploadPDFForm = document.getElementById('uploadPDFForm');
@@ -1259,6 +1276,74 @@ function setupEventListeners() {
     
     // Load morph chart
     loadMorphChart();
+    
+    // Retry setting up event listeners if forms weren't found
+    setTimeout(() => {
+        const addEventForm = document.getElementById('addEventForm');
+        const addTaskForm = document.getElementById('addTaskForm');
+        const addLinkForm = document.getElementById('addLinkForm');
+        
+        if (!addEventForm || !addTaskForm || !addLinkForm) {
+            console.log('Retrying to set up form event listeners...');
+            setupFormEventListeners();
+        }
+    }, 1000);
+}
+
+// Separate function for form event listeners
+function setupFormEventListeners() {
+    console.log('Setting up form event listeners...');
+    
+    // Event form
+    const addEventForm = document.getElementById('addEventForm');
+    if (addEventForm && !addEventForm.hasAttribute('data-listener-attached')) {
+        addEventForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Event form submitted');
+            try {
+                addEvent();
+            } catch (error) {
+                console.error('Error adding event:', error);
+                showNotification('Error adding event: ' + error.message);
+            }
+        });
+        addEventForm.setAttribute('data-listener-attached', 'true');
+        console.log('Event form event listener attached (retry)');
+    }
+    
+    // Task form
+    const addTaskForm = document.getElementById('addTaskForm');
+    if (addTaskForm && !addTaskForm.hasAttribute('data-listener-attached')) {
+        addTaskForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Task form submitted');
+            try {
+                addTask();
+            } catch (error) {
+                console.error('Error adding task:', error);
+                showNotification('Error adding task: ' + error.message);
+            }
+        });
+        addTaskForm.setAttribute('data-listener-attached', 'true');
+        console.log('Task form event listener attached (retry)');
+    }
+    
+    // Link form
+    const addLinkForm = document.getElementById('addLinkForm');
+    if (addLinkForm && !addLinkForm.hasAttribute('data-listener-attached')) {
+        addLinkForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Link form submitted');
+            try {
+                addLink();
+            } catch (error) {
+                console.error('Error adding link:', error);
+                showNotification('Error adding link: ' + error.message);
+            }
+        });
+        addLinkForm.setAttribute('data-listener-attached', 'true');
+        console.log('Link form event listener attached (retry)');
+    }
 }
 
 // Emergency reset function - can be called from console
