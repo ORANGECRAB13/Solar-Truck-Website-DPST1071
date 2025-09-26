@@ -46,12 +46,12 @@ let links = {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded - Script.js is working');
-    initializeFirebaseData();
-    loadFromLocalStorage();
+            initializeFirebaseData();
+            loadFromLocalStorage();
     initializeCalendar();
-    renderEvents();
-    renderTasks();
-    renderLinks();
+            renderEvents();
+            renderTasks();
+            renderLinks();
     setupEventListeners();
 });
 
@@ -203,7 +203,7 @@ async function saveLinksToFirebase() {
 }
 
 // Clear all data
-window.clearAllData = function() {
+function clearAllData() {
     if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
         localStorage.removeItem('solarTruckEvents');
         localStorage.removeItem('solarTruckTasks');
@@ -240,7 +240,7 @@ window.clearAllData = function() {
 }
 
 // User management
-window.saveUserName = function() {
+function saveUserName() {
     const userName = document.getElementById('userName').value.trim();
     if (userName) {
         currentUser = userName;
@@ -266,7 +266,7 @@ function openPDFViewer(pdfUrl, title) {
     loadPDF(pdfUrl);
 }
 
-window.closePDFViewer = function() {
+function closePDFViewer() {
     document.getElementById('pdfModal').style.display = 'none';
     pdfDoc = null;
     currentPage = 1;
@@ -324,7 +324,7 @@ function renderPage(pageNum) {
     });
 }
 
-window.previousPage = function() {
+function previousPage() {
     if (currentPage > 1) {
         currentPage--;
         renderPage(currentPage);
@@ -333,7 +333,7 @@ window.previousPage = function() {
     }
 }
 
-window.nextPage = function() {
+function nextPage() {
     if (currentPage < totalPages) {
         currentPage++;
         renderPage(currentPage);
@@ -342,13 +342,13 @@ window.nextPage = function() {
     }
 }
 
-window.zoomIn = function() {
+function zoomIn() {
     currentZoom = Math.min(currentZoom * 1.2, 3.0);
     renderPage(currentPage);
     updateZoomLevel();
 }
 
-window.zoomOut = function() {
+function zoomOut() {
     currentZoom = Math.max(currentZoom / 1.2, 0.5);
     renderPage(currentPage);
     updateZoomLevel();
@@ -367,7 +367,7 @@ function updateZoomLevel() {
     document.getElementById('pdfZoomLevel').textContent = Math.round(currentZoom * 100) + '%';
 }
 
-window.downloadPDF = function() {
+function downloadPDF() {
     if (currentPDFUrl) {
         const link = document.createElement('a');
         link.href = currentPDFUrl;
@@ -493,12 +493,12 @@ function showDayEvents(dateString) {
 }
 
 // Calendar navigation functions
-window.previousMonth = function() {
+function previousMonth() {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendar();
 }
 
-window.nextMonth = function() {
+function nextMonth() {
     currentDate.setMonth(currentDate.getMonth() + 1);
     renderCalendar();
 }
@@ -707,10 +707,10 @@ async function addTask() {
     
     // Try Firebase first, fallback to localStorage
     const firebaseSuccess = await saveTaskToFirebase(taskData);
-    
-    if (!firebaseSuccess) {
-        // Fallback to local storage
-        saveToLocalStorage();
+        
+        if (!firebaseSuccess) {
+            // Fallback to local storage
+            saveToLocalStorage();
         renderTasks();
     }
     
@@ -839,7 +839,7 @@ async function addLink() {
     if (!firebaseSuccess) {
         // Fallback to local storage
         saveToLocalStorage();
-        renderLinks();
+    renderLinks();
     }
     
     // Show success message
@@ -909,7 +909,7 @@ async function uploadPDF() {
 }
 
 // Collapsible Section Functions
-window.toggleAddLinkSection = function() {
+function toggleAddLinkSection() {
     const section = document.getElementById('addLinkSection');
     const button = document.getElementById('addLinkBtn');
     
@@ -930,7 +930,7 @@ window.toggleAddLinkSection = function() {
     }
 }
 
-window.toggleUploadPDFSection = function() {
+function toggleUploadPDFSection() {
     const section = document.getElementById('uploadPDFSection');
     const button = document.getElementById('uploadPDFBtn');
     
@@ -951,7 +951,7 @@ window.toggleUploadPDFSection = function() {
     }
 }
 
-window.toggleAddEventSection = function() {
+function toggleAddEventSection() {
     const section = document.getElementById('addEventSection');
     const button = document.getElementById('addEventBtn');
     
@@ -972,8 +972,8 @@ window.toggleAddEventSection = function() {
         }
     }
 }
-// Modal Functions - Attached to window for global access
-window.openProjectHub = function() {
+// Modal Functions
+function openProjectHub() {
     document.getElementById('projectHub').style.display = 'block';
     // Initialize the first tab by directly showing it
     const tabContents = document.querySelectorAll('.tab-content');
@@ -995,14 +995,14 @@ window.openProjectHub = function() {
     renderEvents();
     renderTasks();
     renderLinks();
-};
+}
 
-window.closeProjectHub = function() {
+function closeProjectHub() {
     document.getElementById('projectHub').style.display = 'none';
-};
+}
 
-// Tab Functions - Attached to window for global access
-window.openTab = function(event, tabName) {
+// Tab Functions
+function openTab(tabName) {
     // Hide all tab contents
     const tabContents = document.querySelectorAll('.tab-content');
     tabContents.forEach(content => {
@@ -1061,7 +1061,7 @@ function loadMorphChart() {
     }
 }
 
-window.saveMorphChart = function() {
+function saveMorphChart() {
         const table = document.getElementById('morphTable');
         const notes = document.getElementById('morphNotes').value;
         
@@ -1088,7 +1088,7 @@ window.saveMorphChart = function() {
 }
 
 // Morph Chart Functions
-window.addMorphColumn = function() {
+function addMorphColumn() {
     const table = document.getElementById('morphTable');
     const headerRow = table.querySelector('thead tr');
     const bodyRows = table.querySelectorAll('tbody tr');
@@ -1108,7 +1108,7 @@ window.addMorphColumn = function() {
     });
 }
 
-window.addMorphRow = function() {
+function addMorphRow() {
     const table = document.getElementById('morphTable');
     const tbody = table.querySelector('tbody');
     const headerCount = table.querySelector('thead tr').children.length;
@@ -1130,7 +1130,7 @@ window.addMorphRow = function() {
     tbody.appendChild(newRow);
 }
 
-window.deleteMorphColumn = function() {
+function deleteMorphColumn() {
     const table = document.getElementById('morphTable');
     const headerRow = table.querySelector('thead tr');
     const bodyRows = table.querySelectorAll('tbody tr');
@@ -1148,7 +1148,7 @@ window.deleteMorphColumn = function() {
     }
 }
 
-window.deleteMorphRow = function() {
+function deleteMorphRow() {
     const tbody = document.getElementById('morphTable').querySelector('tbody');
     const rows = tbody.querySelectorAll('tr');
     
@@ -1185,20 +1185,25 @@ function showNotification(message) {
 function setupEventListeners() {
     console.log('Setting up event listeners...');
     
-    // PDF Modal close
-    const pdfModal = document.getElementById('pdfModal');
-    if (pdfModal) {
-        pdfModal.addEventListener('click', function(e) {
-            if (e.target === pdfModal) {
-                closePDFViewer();
-            }
-        });
-        console.log('PDF modal event listener attached');
+    // Main Project Hub button
+    const openProjectHubBtn = document.getElementById('openProjectHubBtn');
+    if (openProjectHubBtn) {
+        openProjectHubBtn.addEventListener('click', openProjectHub);
+        console.log('Open Project Hub button event listener attached');
     } else {
-        console.error('PDF modal not found!');
+        console.error('Open Project Hub button not found!');
     }
     
-    // Project Hub Modal close
+    // Close Project Hub button
+    const closeProjectHubBtn = document.getElementById('closeProjectHubBtn');
+    if (closeProjectHubBtn) {
+        closeProjectHubBtn.addEventListener('click', closeProjectHub);
+        console.log('Close Project Hub button event listener attached');
+    } else {
+        console.error('Close Project Hub button not found!');
+    }
+    
+    // Project Hub Modal close on outside click
     const projectHubModal = document.getElementById('projectHub');
     if (projectHubModal) {
         projectHubModal.addEventListener('click', function(e) {
@@ -1209,6 +1214,57 @@ function setupEventListeners() {
         console.log('Project Hub modal event listener attached');
     } else {
         console.error('Project Hub modal not found!');
+    }
+    
+    // Clear All Data button
+    const clearAllDataBtn = document.getElementById('clearAllDataBtn');
+    if (clearAllDataBtn) {
+        clearAllDataBtn.addEventListener('click', clearAllData);
+        console.log('Clear All Data button event listener attached');
+    } else {
+        console.error('Clear All Data button not found!');
+    }
+    
+    // Save User Name button
+    const saveUserNameBtn = document.getElementById('saveUserNameBtn');
+    if (saveUserNameBtn) {
+        saveUserNameBtn.addEventListener('click', saveUserName);
+        console.log('Save User Name button event listener attached');
+    } else {
+        console.error('Save User Name button not found!');
+    }
+    
+    // Tab buttons
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            openTab(tabName);
+        });
+    });
+    console.log('Tab buttons event listeners attached');
+    
+    // Edit mode buttons
+    const editModeButtons = document.querySelectorAll('[data-edit-target]');
+    editModeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const target = this.getAttribute('data-edit-target');
+            toggleEditMode(target);
+        });
+    });
+    console.log('Edit mode buttons event listeners attached');
+    
+    // PDF Modal close
+    const pdfModal = document.getElementById('pdfViewerModal');
+    if (pdfModal) {
+        pdfModal.addEventListener('click', function(e) {
+            if (e.target === pdfModal) {
+                closePDFViewer();
+            }
+        });
+        console.log('PDF modal event listener attached');
+    } else {
+        console.error('PDF modal not found!');
     }
     
     // Form submissions
@@ -1277,6 +1333,9 @@ function setupEventListeners() {
     // Load morph chart
     loadMorphChart();
     
+    // Add remaining event listeners
+    setupAdditionalEventListeners();
+    
     // Retry setting up event listeners if forms weren't found
     setTimeout(() => {
         const addEventForm = document.getElementById('addEventForm');
@@ -1288,6 +1347,131 @@ function setupEventListeners() {
             setupFormEventListeners();
         }
     }, 1000);
+}
+
+// Additional event listeners for buttons and controls
+function setupAdditionalEventListeners() {
+    console.log('Setting up additional event listeners...');
+    
+    // Add Link section toggle
+    const addLinkBtn = document.getElementById('addLinkBtn');
+    if (addLinkBtn) {
+        addLinkBtn.addEventListener('click', toggleAddLinkSection);
+        console.log('Add Link button event listener attached');
+    }
+    
+    const closeAddLinkBtn = document.getElementById('closeAddLinkBtn');
+    if (closeAddLinkBtn) {
+        closeAddLinkBtn.addEventListener('click', toggleAddLinkSection);
+        console.log('Close Add Link button event listener attached');
+    }
+    
+    // Upload PDF section toggle
+    const uploadPDFBtn = document.getElementById('uploadPDFBtn');
+    if (uploadPDFBtn) {
+        uploadPDFBtn.addEventListener('click', toggleUploadPDFSection);
+        console.log('Upload PDF button event listener attached');
+    }
+    
+    const closeUploadPDFBtn = document.getElementById('closeUploadPDFBtn');
+    if (closeUploadPDFBtn) {
+        closeUploadPDFBtn.addEventListener('click', toggleUploadPDFSection);
+        console.log('Close Upload PDF button event listener attached');
+    }
+    
+    // Add Event section toggle
+    const addEventBtn = document.getElementById('addEventBtn');
+    if (addEventBtn) {
+        addEventBtn.addEventListener('click', toggleAddEventSection);
+        console.log('Add Event button event listener attached');
+    }
+    
+    const closeAddEventBtn = document.getElementById('closeAddEventBtn');
+    if (closeAddEventBtn) {
+        closeAddEventBtn.addEventListener('click', toggleAddEventSection);
+        console.log('Close Add Event button event listener attached');
+    }
+    
+    // Calendar navigation
+    const previousMonthBtn = document.getElementById('previousMonthBtn');
+    if (previousMonthBtn) {
+        previousMonthBtn.addEventListener('click', previousMonth);
+        console.log('Previous Month button event listener attached');
+    }
+    
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    if (nextMonthBtn) {
+        nextMonthBtn.addEventListener('click', nextMonth);
+        console.log('Next Month button event listener attached');
+    }
+    
+    // PDF viewer controls
+    const prevBtn = document.getElementById('prevBtn');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', previousPage);
+        console.log('PDF Previous Page button event listener attached');
+    }
+    
+    const nextBtn = document.getElementById('nextBtn');
+    if (nextBtn) {
+        nextBtn.addEventListener('click', nextPage);
+        console.log('PDF Next Page button event listener attached');
+    }
+    
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    if (zoomInBtn) {
+        zoomInBtn.addEventListener('click', zoomIn);
+        console.log('PDF Zoom In button event listener attached');
+    }
+    
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    if (zoomOutBtn) {
+        zoomOutBtn.addEventListener('click', zoomOut);
+        console.log('PDF Zoom Out button event listener attached');
+    }
+    
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', downloadPDF);
+        console.log('PDF Download button event listener attached');
+    }
+    
+    const closePDFBtn = document.getElementById('closePDFBtn');
+    if (closePDFBtn) {
+        closePDFBtn.addEventListener('click', closePDFViewer);
+        console.log('PDF Close button event listener attached');
+    }
+    
+    // Morph chart controls
+    const addMorphColumnBtn = document.getElementById('addMorphColumnBtn');
+    if (addMorphColumnBtn) {
+        addMorphColumnBtn.addEventListener('click', addMorphColumn);
+        console.log('Add Morph Column button event listener attached');
+    }
+    
+    const addMorphRowBtn = document.getElementById('addMorphRowBtn');
+    if (addMorphRowBtn) {
+        addMorphRowBtn.addEventListener('click', addMorphRow);
+        console.log('Add Morph Row button event listener attached');
+    }
+    
+    const deleteMorphColumnBtn = document.getElementById('deleteMorphColumnBtn');
+    if (deleteMorphColumnBtn) {
+        deleteMorphColumnBtn.addEventListener('click', deleteMorphColumn);
+        console.log('Delete Morph Column button event listener attached');
+    }
+    
+    const deleteMorphRowBtn = document.getElementById('deleteMorphRowBtn');
+    if (deleteMorphRowBtn) {
+        deleteMorphRowBtn.addEventListener('click', deleteMorphRow);
+        console.log('Delete Morph Row button event listener attached');
+    }
+    
+    const saveMorphChartBtn = document.getElementById('saveMorphChartBtn');
+    if (saveMorphChartBtn) {
+        saveMorphChartBtn.addEventListener('click', saveMorphChart);
+        console.log('Save Morph Chart button event listener attached');
+    }
 }
 
 // Separate function for form event listeners
@@ -1336,7 +1520,7 @@ function setupFormEventListeners() {
             console.log('Link form submitted');
             try {
                 addLink();
-            } catch (error) {
+        } catch (error) {
                 console.error('Error adding link:', error);
                 showNotification('Error adding link: ' + error.message);
             }

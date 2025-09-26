@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- CSP temporarily disabled to test eval issue -->
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.gstatic.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.gstatic.com; object-src 'none';"> -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.gstatic.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.gstatic.com; object-src 'none';">
     <title>Solar Truck Project - DPST1071</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -82,7 +81,7 @@
                 </ul>
             </nav>
             <div class="debug-controls">
-                <button onclick="clearAllData()" class="debug-btn" title="Clear All Data">
+                <button id="clearAllDataBtn" class="debug-btn" title="Clear All Data">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -97,7 +96,7 @@
         <div class="hero-image">
             <!-- Project Hub Button on the right side -->
             <div class="hero-right-cta">
-                <button class="hero-project-hub-button" onclick="openProjectHub()">
+                <button class="hero-project-hub-button" id="openProjectHubBtn">
                     <i class="fas fa-cogs"></i>
                     <span>Project Hub</span>
                     <small>Manage Links, Calendar, Plans & Tasks</small>
@@ -109,25 +108,25 @@
     <!-- Project Hub Modal -->
     <div id="projectHub" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeProjectHub()">&times;</span>
+            <span class="close" id="closeProjectHubBtn">&times;</span>
             <h2>Project Hub</h2>
             <div class="user-identification">
                 <label for="userName">Your Name:</label>
                 <input type="text" id="userName" placeholder="Enter your name" value="" autocomplete="name">
-                <button onclick="saveUserName()" class="user-save-btn">Save</button>
+                <button id="saveUserNameBtn" class="user-save-btn">Save</button>
             </div>
             <div class="hub-tabs">
-                <button class="tab-button active" onclick="openTab(event, 'links')">Links & Resources</button>
-                <button class="tab-button" onclick="openTab(event, 'calendar')">Calendar & Schedule</button>
-                <button class="tab-button" onclick="openTab(event, 'morph')">Morph Chart</button>
-                <button class="tab-button" onclick="openTab(event, 'tasks')">Tasks & Progress</button>
+                <button class="tab-button active" data-tab="links">Links & Resources</button>
+                <button class="tab-button" data-tab="calendar">Calendar & Schedule</button>
+                <button class="tab-button" data-tab="morph">Morph Chart</button>
+                <button class="tab-button" data-tab="tasks">Tasks & Progress</button>
             </div>
 
             <!-- Links & Resources Tab -->
             <div id="links" class="tab-content active">
                 <div class="tab-header">
                     <h3>Important Links & Resources</h3>
-                    <button class="edit-mode-btn" id="linksEditBtn" onclick="toggleEditMode('links')">
+                    <button class="edit-mode-btn" id="linksEditBtn" data-edit-target="links">
                         <i class="fas fa-edit"></i> Edit
                     </button>
                 </div>
@@ -135,10 +134,10 @@
                     <!-- Links will be dynamically loaded here -->
                 </div>
                 <div class="action-buttons">
-                    <button class="action-btn" id="addLinkBtn" onclick="toggleAddLinkSection()">
+                    <button class="action-btn" id="addLinkBtn">
                         <i class="fas fa-plus"></i> Add New Link
                     </button>
-                    <button class="action-btn" id="uploadPDFBtn" onclick="toggleUploadPDFSection()">
+                    <button class="action-btn" id="uploadPDFBtn">
                         <i class="fas fa-upload"></i> Upload PDF Document
                     </button>
                 </div>
@@ -146,7 +145,7 @@
                 <div class="add-link-section collapsible" id="addLinkSection" style="display: none;">
                     <div class="section-header">
                         <h4>Add New Link</h4>
-                        <button class="close-btn" onclick="toggleAddLinkSection()">
+                        <button class="close-btn" id="closeAddLinkBtn">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -168,7 +167,7 @@
                 <div class="upload-section collapsible" id="uploadPDFSection" style="display: none;">
                     <div class="section-header">
                         <h4>Upload PDF Document</h4>
-                        <button class="close-btn" onclick="toggleUploadPDFSection()">
+                        <button class="close-btn" id="closeUploadPDFBtn">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -193,16 +192,16 @@
                 <h3>Project Calendar & Schedule</h3>
                 <div class="calendar-container">
                     <div class="calendar-header">
-                        <button onclick="previousMonth()"><i class="fas fa-chevron-left"></i></button>
+                        <button id="previousMonthBtn"><i class="fas fa-chevron-left"></i></button>
                         <h4 id="currentMonth"></h4>
-                        <button onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+                        <button id="nextMonthBtn"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="calendar-grid" id="calendarGrid"></div>
                 </div>
                 <div class="schedule-section">
                     <div class="section-header">
                         <h4>Upcoming Events</h4>
-                        <button class="edit-mode-btn" id="eventsEditBtn" onclick="toggleEditMode('events')">
+                        <button class="edit-mode-btn" id="eventsEditBtn" data-edit-target="events">
                             <i class="fas fa-edit"></i> Edit
                         </button>
                     </div>
@@ -211,7 +210,7 @@
                     </div>
                     
                     <div class="action-buttons">
-                        <button class="action-btn" id="addEventBtn" onclick="toggleAddEventSection()">
+                        <button class="action-btn" id="addEventBtn">
                             <i class="fas fa-plus"></i> Add New Event
                         </button>
                     </div>
@@ -219,7 +218,7 @@
                     <div class="add-event-section collapsible" id="addEventSection" style="display: none;">
                         <div class="section-header">
                             <h4>Add New Event</h4>
-                            <button class="close-btn" onclick="toggleAddEventSection()">
+                            <button class="close-btn" id="closeAddEventBtn">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -240,19 +239,19 @@
                 <h3>Morph Chart - Design Options Comparison</h3>
                 <div class="morph-chart-container">
                     <div class="morph-controls">
-                        <button class="morph-btn" onclick="addMorphColumn()">
+                        <button class="morph-btn" id="addMorphColumnBtn">
                             <i class="fas fa-plus"></i> Add Column
                         </button>
-                        <button class="morph-btn" onclick="addMorphRow()">
+                        <button class="morph-btn" id="addMorphRowBtn">
                             <i class="fas fa-plus"></i> Add Function
                         </button>
-                        <button class="morph-btn delete-btn" onclick="deleteMorphColumn()">
+                        <button class="morph-btn delete-btn" id="deleteMorphColumnBtn">
                             <i class="fas fa-minus"></i> Delete Column
                         </button>
-                        <button class="morph-btn delete-btn" onclick="deleteMorphRow()">
+                        <button class="morph-btn delete-btn" id="deleteMorphRowBtn">
                             <i class="fas fa-minus"></i> Delete Function
                         </button>
-                        <button class="morph-btn" onclick="saveMorphChart()">
+                        <button class="morph-btn" id="saveMorphChartBtn">
                             <i class="fas fa-save"></i> Save Chart
                         </button>
                     </div>
@@ -339,7 +338,7 @@
             <div id="tasks" class="tab-content">
                 <div class="tab-header">
                     <h3>Tasks & Progress Tracking</h3>
-                    <button class="edit-mode-btn" id="tasksEditBtn" onclick="toggleEditMode('tasks')">
+                    <button class="edit-mode-btn" id="tasksEditBtn" data-edit-target="tasks">
                         <i class="fas fa-edit"></i> Edit
                     </button>
                 </div>
@@ -387,24 +386,24 @@
             <div class="pdf-header">
                 <h3 id="pdfTitle">PDF Viewer</h3>
                 <div class="pdf-controls">
-                    <button class="pdf-control-btn" onclick="previousPage()" id="prevBtn" disabled>
+                    <button class="pdf-control-btn" id="prevBtn" disabled>
                         <i class="fas fa-chevron-left"></i>
                     </button>
                     <span id="pageInfo">Page 1 of 1</span>
-                    <button class="pdf-control-btn" onclick="nextPage()" id="nextBtn" disabled>
+                    <button class="pdf-control-btn" id="nextBtn" disabled>
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                    <button class="pdf-control-btn" onclick="zoomOut()" id="zoomOutBtn">
+                    <button class="pdf-control-btn" id="zoomOutBtn">
                         <i class="fas fa-search-minus"></i>
                     </button>
                     <span id="zoomLevel">100%</span>
-                    <button class="pdf-control-btn" onclick="zoomIn()" id="zoomInBtn">
+                    <button class="pdf-control-btn" id="zoomInBtn">
                         <i class="fas fa-search-plus"></i>
                     </button>
-                    <button class="pdf-control-btn" onclick="downloadPDF()" id="downloadBtn">
+                    <button class="pdf-control-btn" id="downloadBtn">
                         <i class="fas fa-download"></i>
                     </button>
-                    <button class="pdf-control-btn" onclick="closePDFViewer()" id="closeBtn">
+                    <button class="pdf-control-btn" id="closePDFBtn">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
