@@ -795,13 +795,22 @@ function editEvent(index) {
 
 // Task Functions
 function renderTasks() {
-    const categories = ['design', 'research', 'assembly', 'testing'];
+    // Get all unique categories from existing tasks and HTML form options
+    const htmlCategories = ['design', 'procurement', 'assembly', 'testing'];
+    const existingCategories = [...new Set(tasks.map(task => task.category))];
+    const allCategories = [...new Set([...htmlCategories, ...existingCategories])];
     
-    categories.forEach(category => {
+    console.log('Rendering tasks for categories:', allCategories);
+    
+    allCategories.forEach(category => {
         const taskList = document.getElementById(category + 'Tasks');
-        if (!taskList) return;
+        if (!taskList) {
+            console.log(`Task list element not found for category: ${category}Tasks`);
+            return;
+        }
             
-            const categoryTasks = tasks.filter(task => task.category === category);
+        const categoryTasks = tasks.filter(task => task.category === category);
+        console.log(`Found ${categoryTasks.length} tasks for category: ${category}`);
         
         taskList.innerHTML = '';
         
