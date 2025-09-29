@@ -57,18 +57,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize Firebase data listeners
 function initializeFirebaseData() {
-    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+    if (!window.db || !window.firebaseFunctions) {
         console.log('Firebase not available, using localStorage only');
         return;
     }
 
     const { collection, onSnapshot, query, orderBy } = window.firebaseFunctions;
-    const sessionId = window.currentSessionId;
     
-    console.log('Initializing Firebase data for session:', sessionId);
+    console.log('Initializing shared Firebase data for all users');
     
-    // Set up real-time listeners for events (session-specific)
-    const eventsQuery = query(collection(window.db, `sessions/${sessionId}/events`), orderBy('date', 'asc'));
+    // Set up real-time listeners for events (shared across all users)
+    const eventsQuery = query(collection(window.db, 'events'), orderBy('date', 'asc'));
     onSnapshot(eventsQuery, (snapshot) => {
         events = [];
         snapshot.forEach((doc) => {
@@ -78,8 +77,8 @@ function initializeFirebaseData() {
         renderCalendar();
     });
 
-    // Set up real-time listeners for tasks (session-specific)
-    const tasksQuery = query(collection(window.db, `sessions/${sessionId}/tasks`), orderBy('category', 'asc'));
+    // Set up real-time listeners for tasks (shared across all users)
+    const tasksQuery = query(collection(window.db, 'tasks'), orderBy('category', 'asc'));
     onSnapshot(tasksQuery, (snapshot) => {
         tasks = [];
         snapshot.forEach((doc) => {
@@ -88,8 +87,8 @@ function initializeFirebaseData() {
         renderTasks();
     });
 
-    // Set up real-time listener for links (session-specific)
-    const linksQuery = collection(window.db, `sessions/${sessionId}/links`);
+    // Set up real-time listener for links (shared across all users)
+    const linksQuery = collection(window.db, 'links');
     onSnapshot(linksQuery, (snapshot) => {
         if (!snapshot.empty) {
             const doc = snapshot.docs[0];
@@ -102,8 +101,8 @@ function initializeFirebaseData() {
         }
     });
 
-    // Set up real-time listener for morph chart data (session-specific)
-    const morphQuery = collection(window.db, `sessions/${sessionId}/morphChart`);
+    // Set up real-time listener for morph chart data (shared across all users)
+    const morphQuery = collection(window.db, 'morphChart');
     onSnapshot(morphQuery, (snapshot) => {
         if (!snapshot.empty) {
             const doc = snapshot.docs[0];
@@ -146,20 +145,19 @@ function saveToLocalStorage() {
 
 // Firebase save functions
 async function saveEventToFirebase(eventData) {
-    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+    if (!window.db || !window.firebaseFunctions) {
         return false;
     }
 
     try {
         const { collection, addDoc, doc, updateDoc } = window.firebaseFunctions;
-        const sessionId = window.currentSessionId;
         
         if (eventData.id && eventData.id.toString().length > 10) {
             // Update existing event
-            await updateDoc(doc(window.db, `sessions/${sessionId}/events`, eventData.id), eventData);
+            await updateDoc(doc(window.db, 'events', eventData.id), eventData);
         } else {
             // Add new event
-            await addDoc(collection(window.db, `sessions/${sessionId}/events`), eventData);
+            await addDoc(collection(window.db, 'events'), eventData);
         }
         return true;
     } catch (error) {
@@ -169,20 +167,19 @@ async function saveEventToFirebase(eventData) {
 }
 
 async function saveTaskToFirebase(taskData) {
-    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+    if (!window.db || !window.firebaseFunctions) {
         return false;
     }
 
     try {
         const { collection, addDoc, doc, updateDoc } = window.firebaseFunctions;
-        const sessionId = window.currentSessionId;
         
         if (taskData.id && taskData.id.toString().length > 10) {
             // Update existing task
-            await updateDoc(doc(window.db, `sessions/${sessionId}/tasks`, taskData.id), taskData);
+            await updateDoc(doc(window.db, 'tasks', taskData.id), taskData);
         } else {
             // Add new task
-            await addDoc(collection(window.db, `sessions/${sessionId}/tasks`), taskData);
+            await addDoc(collection(window.db, 'tasks'), taskData);
         }
         return true;
     } catch (error) {
@@ -192,23 +189,22 @@ async function saveTaskToFirebase(taskData) {
 }
 
 async function saveLinksToFirebase() {
-    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+    if (!window.db || !window.firebaseFunctions) {
         return false;
     }
 
     try {
         const { collection, addDoc, doc, updateDoc, getDocs } = window.firebaseFunctions;
-        const sessionId = window.currentSessionId;
         
-        // Check if links already exist in Firebase for this session
-        const linksSnapshot = await getDocs(collection(window.db, `sessions/${sessionId}/links`));
+        // Check if links already exist in Firebase
+        const linksSnapshot = await getDocs(collection(window.db, 'links'));
         if (linksSnapshot.empty) {
             // Create new document with default links
-            await addDoc(collection(window.db, `sessions/${sessionId}/links`), links);
+            await addDoc(collection(window.db, 'links'), links);
         } else {
             // Update existing document
             const docId = linksSnapshot.docs[0].id;
-            await updateDoc(doc(window.db, `sessions/${sessionId}/links`, docId), links);
+            await updateDoc(doc(window.db, 'links', docId), links);
         }
         
         return true;
@@ -219,23 +215,22 @@ async function saveLinksToFirebase() {
 }
 
 async function saveMorphChartToFirebase(morphData) {
-    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+    if (!window.db || !window.firebaseFunctions) {
         return false;
     }
 
     try {
         const { collection, addDoc, doc, updateDoc, getDocs } = window.firebaseFunctions;
-        const sessionId = window.currentSessionId;
         
-        // Check if morph chart already exists in Firebase for this session
-        const morphSnapshot = await getDocs(collection(window.db, `sessions/${sessionId}/morphChart`));
+        // Check if morph chart already exists in Firebase
+        const morphSnapshot = await getDocs(collection(window.db, 'morphChart'));
         if (morphSnapshot.empty) {
             // Create new document
-            await addDoc(collection(window.db, `sessions/${sessionId}/morphChart`), morphData);
+            await addDoc(collection(window.db, 'morphChart'), morphData);
         } else {
             // Update existing document
             const docId = morphSnapshot.docs[0].id;
-            await updateDoc(doc(window.db, `sessions/${sessionId}/morphChart`, docId), morphData);
+            await updateDoc(doc(window.db, 'morphChart', docId), morphData);
         }
         
         return true;
@@ -246,15 +241,14 @@ async function saveMorphChartToFirebase(morphData) {
 }
 
 async function deleteEventFromFirebase(eventId) {
-    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+    if (!window.db || !window.firebaseFunctions) {
         return false;
     }
 
     try {
         const { doc, deleteDoc } = window.firebaseFunctions;
-        const sessionId = window.currentSessionId;
         
-        await deleteDoc(doc(window.db, `sessions/${sessionId}/events`, eventId));
+        await deleteDoc(doc(window.db, 'events', eventId));
         return true;
     } catch (error) {
         console.error('Error deleting event from Firebase:', error);
@@ -263,15 +257,14 @@ async function deleteEventFromFirebase(eventId) {
 }
 
 async function deleteTaskFromFirebase(taskId) {
-    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+    if (!window.db || !window.firebaseFunctions) {
         return false;
     }
 
     try {
         const { doc, deleteDoc } = window.firebaseFunctions;
-        const sessionId = window.currentSessionId;
         
-        await deleteDoc(doc(window.db, `sessions/${sessionId}/tasks`, taskId));
+        await deleteDoc(doc(window.db, 'tasks', taskId));
         return true;
     } catch (error) {
         console.error('Error deleting task from Firebase:', error);
