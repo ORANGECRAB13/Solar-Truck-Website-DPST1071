@@ -396,7 +396,7 @@ function toggleEditMode(section) {
 }
 
 function updateEditModeUI(section) {
-    const button = document.querySelector(`[onclick="toggleEditMode('${section}')"]`);
+    const button = document.querySelector(`[data-edit-target='${section}']`);
     if (button) {
         if (editMode[section]) {
             button.textContent = 'Done';
@@ -464,7 +464,7 @@ function renderCalendar() {
         
         calendarHTML += `
             <div class="calendar-day ${hasEvents ? 'has-events' : ''} ${hasDetailedEvents ? 'has-detailed-event' : ''}" 
-                 onclick="showDayEvents('${dateString}')">
+                 data-date="${dateString}">
                 ${day}
                 ${hasEvents ? `<div class="event-indicator"></div>` : ''}
             </div>
@@ -472,6 +472,15 @@ function renderCalendar() {
     }
     
     calendarGrid.innerHTML = calendarHTML;
+    
+    // Add event listeners to calendar days
+    const calendarDays = calendarGrid.querySelectorAll('.calendar-day[data-date]');
+    calendarDays.forEach(day => {
+        day.addEventListener('click', function() {
+            const dateString = this.getAttribute('data-date');
+            showDayEvents(dateString);
+        });
+    });
 }
 
 function getEventsOnDate(dateString) {
@@ -542,10 +551,10 @@ function renderEvents() {
         if (editMode.events) {
             eventHTML += `
                 <div class="event-actions">
-                    <button class="edit-event-btn" onclick="editEvent(${index})" title="Edit event">
+                    <button class="edit-event-btn" data-event-index="${index}" title="Edit event">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="delete-event-btn" onclick="deleteEvent(${index})" title="Delete event">
+                    <button class="delete-event-btn" data-event-index="${index}" title="Delete event">
                         <i class="fas fa-trash"></i>
                     </button>
             </div>
@@ -553,6 +562,27 @@ function renderEvents() {
         }
         
         eventDiv.innerHTML = eventHTML;
+        
+        // Add event listeners to edit/delete buttons if in edit mode
+        if (editMode.events) {
+            const editBtn = eventDiv.querySelector('.edit-event-btn');
+            const deleteBtn = eventDiv.querySelector('.delete-event-btn');
+            
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    const eventIndex = parseInt(this.getAttribute('data-event-index'));
+                    editEvent(eventIndex);
+                });
+            }
+            
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    const eventIndex = parseInt(this.getAttribute('data-event-index'));
+                    deleteEvent(eventIndex);
+                });
+            }
+        }
+        
         eventsList.appendChild(eventDiv);
     });
 }
@@ -665,20 +695,41 @@ function renderTasks() {
             let taskHTML = `
                 <div class="task-content">
                     <input type="checkbox" ${task.completed ? 'checked' : ''} 
-                           onchange="toggleTask('${category}', ${index})">
+                           data-task-category="${category}" data-task-index="${index}">
                     <span class="task-title">${task.title}</span>
                 </div>
             `;
             
             if (editMode.tasks) {
                 taskHTML += `
-                    <button class="delete-task-btn" onclick="deleteTask('${category}', ${index})" title="Delete task">
+                    <button class="delete-task-btn" data-task-category="${category}" data-task-index="${index}" title="Delete task">
                         <i class="fas fa-trash"></i>
                     </button>
                 `;
             }
             
             taskDiv.innerHTML = taskHTML;
+            
+            // Add event listeners to checkbox and delete button
+            const checkbox = taskDiv.querySelector('input[type="checkbox"]');
+            const deleteBtn = taskDiv.querySelector('.delete-task-btn');
+            
+            if (checkbox) {
+                checkbox.addEventListener('change', function() {
+                    const taskCategory = this.getAttribute('data-task-category');
+                    const taskIndex = parseInt(this.getAttribute('data-task-index'));
+                    toggleTask(taskCategory, taskIndex);
+                });
+            }
+            
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    const taskCategory = this.getAttribute('data-task-category');
+                    const taskIndex = parseInt(this.getAttribute('data-task-index'));
+                    deleteTask(taskCategory, taskIndex);
+                });
+            }
+            
             taskList.appendChild(taskDiv);
         });
     });
@@ -775,7 +826,7 @@ function renderLinks() {
                     ${links[category].map((link, index) => {
                         const isPDF = isPDFUrl(link.url);
                         const deleteButton = editMode.links ? 
-                            `<button class="delete-link-btn" onclick="deleteLink('${category}', ${index})" title="Delete link">
+                            `<button class="delete-link-btn" data-link-category="${category}" data-link-index="${index}" title="Delete link">
                                 <i class="fas fa-trash"></i>
                             </button>` : '';
                         
@@ -786,6 +837,19 @@ function renderLinks() {
                     }).join('')}
                 </ul>
             `;
+            
+            // Add event listeners to delete buttons if in edit mode
+            if (editMode.links) {
+                const deleteButtons = categoryDiv.querySelectorAll('.delete-link-btn');
+                deleteButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const linkCategory = this.getAttribute('data-link-category');
+                        const linkIndex = parseInt(this.getAttribute('data-link-index'));
+                        deleteLink(linkCategory, linkIndex);
+                    });
+                });
+            }
+            
             linksGrid.appendChild(categoryDiv);
         }
     });
