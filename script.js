@@ -674,23 +674,32 @@ async function addEvent() {
         return;
     }
     
-    const eventData = {
-        id: Date.now(),
-        title: title,
-        date: date,
-        time: time || '',
-        location: location || '',
-        description: description || '',
-        createdBy: currentUser || 'Anonymous'
-    };
-    
     // Check if we're editing an existing event
     const editIndex = document.getElementById('addEventForm').getAttribute('data-edit-index');
+    let eventData;
+    
     if (editIndex !== null) {
-        events[editIndex] = eventData;
+        // Editing existing event - keep the Firebase document ID
+        eventData = {
+            id: events[editIndex].id, // Keep the existing Firebase document ID
+            title: title,
+            date: date,
+            time: time || '',
+            location: location || '',
+            description: description || '',
+            createdBy: currentUser || 'Anonymous'
+        };
         document.getElementById('addEventForm').removeAttribute('data-edit-index');
     } else {
-        events.push(eventData);
+        // New event - don't set an ID, let Firebase generate one
+        eventData = {
+            title: title,
+            date: date,
+            time: time || '',
+            location: location || '',
+            description: description || '',
+            createdBy: currentUser || 'Anonymous'
+        };
     }
     
     // Clear form
@@ -701,11 +710,13 @@ async function addEvent() {
     
     if (!firebaseSuccess) {
         // Fallback to local storage
+        if (editIndex !== null) {
+            events[editIndex] = eventData;
+        } else {
+            eventData.id = Date.now(); // Add local ID for localStorage
+            events.push(eventData);
+        }
         saveToLocalStorage();
-    }
-    
-    // Re-render (Firebase listeners will handle this automatically)
-    if (!firebaseSuccess) {
         renderEvents();
         renderCalendar();
     }
@@ -830,23 +841,22 @@ async function addTask() {
     }
     
     const taskData = {
-        id: Date.now(),
         title: title,
         category: category,
         completed: false,
         createdBy: currentUser || 'Anonymous'
     };
     
-    tasks.push(taskData);
-    
     document.getElementById('addTaskForm').reset();
     
     // Try Firebase first, fallback to localStorage
     const firebaseSuccess = await saveTaskToFirebase(taskData);
         
-        if (!firebaseSuccess) {
-            // Fallback to local storage
-            saveToLocalStorage();
+    if (!firebaseSuccess) {
+        // Fallback to local storage
+        taskData.id = Date.now(); // Add local ID for localStorage
+        tasks.push(taskData);
+        saveToLocalStorage();
         renderTasks();
     }
     
