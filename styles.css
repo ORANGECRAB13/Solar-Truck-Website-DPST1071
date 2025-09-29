@@ -1584,6 +1584,7 @@ body {
     .header .container {
         flex-direction: column;
         gap: 1rem;
+        padding: 1rem 0;
     }
     
     .nav ul {
@@ -1592,8 +1593,20 @@ body {
         gap: 1rem;
     }
     
+    /* Increase hero margin-top to account for taller mobile header */
+    .hero {
+        margin-top: 120px;
+        height: 60vh;
+    }
+    
+    .hero-content {
+        left: 2%;
+        top: 40%;
+    }
+    
     .hero-content h2 {
         font-size: 2.5rem;
+        margin-bottom: 1.5rem;
     }
     
     .hero-project-hub-button {
@@ -1722,8 +1735,20 @@ body {
 }
 
 @media (max-width: 480px) {
+    /* Even more space for very small screens */
+    .hero {
+        margin-top: 140px;
+        height: 50vh;
+    }
+    
+    .hero-content {
+        left: 1%;
+        top: 35%;
+    }
+    
     .hero-content h2 {
         font-size: 2rem;
+        margin-bottom: 1rem;
     }
     
     .hero-project-hub-button {
