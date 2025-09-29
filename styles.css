@@ -121,32 +121,35 @@ body {
 
 /* Hero Section */
 .hero {
-    margin-top: 80px;
-    height: 70vh;
+    margin-top: 10vh;
+    min-height: 80vh;
     background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
                 url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%23f0f0f0" width="1200" height="600"/><rect fill="%23e0e0e0" x="0" y="400" width="1200" height="200"/><circle fill="%23ffd700" cx="200" cy="150" r="50"/><rect fill="%23ddd" x="100" y="300" width="200" height="100" rx="10"/></svg>');
     background-size: cover;
     background-position: center;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     position: relative;
+    padding: 5vh 5vw;
+    text-align: center;
 }
 
 .hero-content {
-    position: absolute;
-    top: 50%;
-    left: 5%;
-    transform: translateY(-50%);
+    position: relative;
     z-index: 2;
+    max-width: 90vw;
+    margin-bottom: 5vh;
 }
 
 .hero-content h2 {
-    font-size: 3.5rem;
+    font-size: clamp(2rem, 5vw, 4rem);
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     line-height: 1.2;
-    margin-bottom: 2rem;
+    margin-bottom: 3vh;
 }
 
 
@@ -154,19 +157,21 @@ body {
     background: linear-gradient(135deg, #ffd700, #ffed4e);
     color: #000;
     border: none;
-    padding: 1.5rem 3rem;
-    border-radius: 15px;
+    padding: clamp(1rem, 3vw, 2rem) clamp(2rem, 6vw, 4rem);
+    border-radius: clamp(10px, 2vw, 20px);
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: clamp(0.3rem, 1vw, 0.8rem);
     box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-top: 2vh;
+    max-width: 90vw;
 }
 
 .hero-project-hub-button:hover {
@@ -176,12 +181,12 @@ body {
 }
 
 .hero-project-hub-button i {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    margin-bottom: clamp(0.3rem, 1vw, 0.8rem);
 }
 
 .hero-project-hub-button small {
-    font-size: 0.9rem;
+    font-size: clamp(0.8rem, 2vw, 1.2rem);
     font-weight: normal;
     text-transform: none;
     letter-spacing: normal;
@@ -198,11 +203,9 @@ body {
 }
 
 .hero-right-cta {
-    position: absolute;
-    top: 50%;
-    right: 10%;
-    transform: translateY(-50%);
+    position: relative;
     z-index: 2;
+    margin-top: 2vh;
 }
 
 
@@ -1593,41 +1596,19 @@ body {
         gap: 1rem;
     }
     
-    /* Increase hero margin-top to account for taller mobile header */
+    /* Hero section is now fully responsive with viewport units */
     .hero {
-        margin-top: 120px;
-        height: 60vh;
+        margin-top: 15vh;
+        min-height: 70vh;
+        padding: 3vh 3vw;
     }
     
     .hero-content {
-        left: 2%;
-        top: 40%;
-    }
-    
-    .hero-content h2 {
-        font-size: 2.5rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .hero-project-hub-button {
-        padding: 1rem 2rem;
-        font-size: 1rem;
-    }
-    
-    .hero-project-hub-button i {
-        font-size: 1.5rem;
+        margin-bottom: 3vh;
     }
     
     .hero-right-cta {
-        position: static;
-        transform: none;
-        margin-top: 2rem;
-        text-align: center;
-    }
-    
-    /* Move Project Hub button down significantly on mobile */
-    .hero-project-hub-button {
-        margin-top: 100% !important;
+        margin-top: 3vh;
     }
     
     .modal-content {
@@ -1740,29 +1721,19 @@ body {
 }
 
 @media (max-width: 480px) {
-    /* Even more space for very small screens */
+    /* Small screens - everything is now responsive with viewport units */
     .hero {
-        margin-top: 140px;
-        height: 50vh;
+        margin-top: 20vh;
+        min-height: 60vh;
+        padding: 2vh 2vw;
     }
     
     .hero-content {
-        left: 1%;
-        top: 35%;
+        margin-bottom: 2vh;
     }
     
-    .hero-content h2 {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-    
-    .hero-project-hub-button {
-        padding: 0.8rem 1.5rem;
-        font-size: 0.9rem;
-    }
-    
-    .hero-project-hub-button i {
-        font-size: 1.2rem;
+    .hero-right-cta {
+        margin-top: 2vh;
     }
     
     .section h2 {
