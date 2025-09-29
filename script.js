@@ -235,7 +235,7 @@ function clearAllData() {
         renderTasks();
         renderLinks();
         
-        showNotification('All data cleared and reset to default PDFs!');
+        //showNotification('All data cleared and reset to default PDFs!');
     }
 }
 
@@ -245,7 +245,7 @@ function saveUserName() {
     if (userName) {
         currentUser = userName;
         localStorage.setItem('solarTruckUserName', userName);
-        showNotification(`Welcome, ${userName}!`);
+        //showNotification(`Welcome, ${userName}!`);
     }
 }
 
@@ -568,7 +568,7 @@ async function addEvent() {
     console.log('Event data:', { title, date, time, location, description });
     
     if (!title || !date) {
-        showNotification('Please fill in at least the title and date.');
+        //showNotification('Please fill in at least the title and date.');
         return;
     }
     
@@ -608,7 +608,7 @@ async function addEvent() {
         renderCalendar();
     }
     
-    showNotification('Event saved successfully!');
+    //showNotification('Event saved successfully!');
     
     // Close the add event section
     toggleAddEventSection();
@@ -620,7 +620,7 @@ function deleteEvent(index) {
         saveToLocalStorage();
         renderEvents();
         renderCalendar();
-        showNotification('Event deleted successfully!');
+        //showNotification('Event deleted successfully!');
     }
 }
 
@@ -689,7 +689,7 @@ async function addTask() {
     const category = document.getElementById('taskCategory').value;
     
     if (!title || !category) {
-        showNotification('Please fill in both title and category.');
+        //showNotification('Please fill in both title and category.');
         return;
     }
     
@@ -714,7 +714,7 @@ async function addTask() {
         renderTasks();
     }
     
-    showNotification('Task added successfully!');
+    //showNotification('Task added successfully!');
 }
 
 function toggleTask(category, index) {
@@ -736,7 +736,7 @@ function deleteTask(category, index) {
             tasks.splice(globalIndex, 1);
             saveToLocalStorage();
             renderTasks();
-            showNotification('Task deleted successfully!');
+            //showNotification('Task deleted successfully!');
         }
     }
 }
@@ -803,7 +803,7 @@ async function addLink() {
     // Check if elements exist
     if (!titleElement || !urlElement || !categoryElement) {
         console.error('Link form elements not found!');
-        showNotification('Error: Link form not found. Please refresh the page.');
+        // showNotification('Error: Link form not found. Please refresh the page.');
         return;
     }
     
@@ -812,7 +812,7 @@ async function addLink() {
     const category = categoryElement.value;
     
     if (!title || !url || !category) {
-        showNotification('Please fill in all fields.');
+        //showNotification('Please fill in all fields.');
         return;
     }
     
@@ -843,7 +843,7 @@ async function addLink() {
     }
     
     // Show success message
-    showNotification('Link added successfully!');
+    //showNotification('Link added successfully!');
     
     // Close the add link section
     toggleAddLinkSection();
@@ -859,7 +859,7 @@ async function deleteLink(category, index) {
             saveToLocalStorage();
             renderLinks();
             
-            showNotification('Link deleted successfully!');
+           // showNotification('Link deleted successfully!');
         }
     }
 }
@@ -871,13 +871,13 @@ async function uploadPDF() {
     const category = document.getElementById('pdfCategory').value;
     
     if (!title || !fileInput.files[0] || !category) {
-        showNotification('Please fill in all fields and select a PDF file.');
+        //showNotification('Please fill in all fields and select a PDF file.');
         return;
     }
     
     const file = fileInput.files[0];
     if (file.type !== 'application/pdf') {
-        showNotification('Please select a valid PDF file.');
+        //showNotification('Please select a valid PDF file.');
         return;
     }
     
@@ -902,7 +902,7 @@ async function uploadPDF() {
         saveToLocalStorage();
     renderLinks();
     
-    showNotification('PDF uploaded successfully! You can now view it directly in the browser.');
+    //showNotification('PDF uploaded successfully! You can now view it directly in the browser.');
     
     // Close the upload section
     toggleUploadPDFSection();
@@ -1084,7 +1084,7 @@ function saveMorphChart() {
         
     morphChartData = morphData;
     saveToLocalStorage();
-    showNotification('Morph chart saved successfully!');
+    //showNotification('Morph chart saved successfully!');
 }
 
 // Morph Chart Functions
@@ -1157,7 +1157,7 @@ function deleteMorphRow() {
     }
 }
 
-// Notification system
+/* Notification system
 function showNotification(message) {
     // Create notification element
     const notification = document.createElement('div');
@@ -1179,7 +1179,7 @@ function showNotification(message) {
             document.body.removeChild(notification);
         }, 300);
     }, 3000);
-}
+} */
 
 // Event Listeners
 function setupEventListeners() {
@@ -1277,7 +1277,7 @@ function setupEventListeners() {
                 addEvent();
             } catch (error) {
                 console.error('Error adding event:', error);
-                showNotification('Error adding event: ' + error.message);
+                //showNotification('Error adding event: ' + error.message);
             }
         });
         console.log('Event form event listener attached');
@@ -1294,7 +1294,7 @@ function setupEventListeners() {
                 addTask();
             } catch (error) {
                 console.error('Error adding task:', error);
-                showNotification('Error adding task: ' + error.message);
+                //showNotification('Error adding task: ' + error.message);
             }
         });
         console.log('Task form event listener attached');
@@ -1311,7 +1311,7 @@ function setupEventListeners() {
                 addLink();
             } catch (error) {
                 console.error('Error adding link:', error);
-                showNotification('Error adding link: ' + error.message);
+                //showNotification('Error adding link: ' + error.message);
             }
         });
         console.log('Link form event listener attached');
@@ -1336,7 +1336,7 @@ function setupEventListeners() {
     // Add remaining event listeners
     setupAdditionalEventListeners();
     
-    // Retry setting up event listeners if forms weren't found
+    /* Retry setting up event listeners if forms weren't found
     setTimeout(() => {
         const addEventForm = document.getElementById('addEventForm');
         const addTaskForm = document.getElementById('addTaskForm');
@@ -1346,7 +1346,7 @@ function setupEventListeners() {
             console.log('Retrying to set up form event listeners...');
             setupFormEventListeners();
         }
-    }, 1000);
+    }, 1000); */
 }
 
 // Additional event listeners for buttons and controls
@@ -1488,7 +1488,7 @@ function setupFormEventListeners() {
                 addEvent();
             } catch (error) {
                 console.error('Error adding event:', error);
-                showNotification('Error adding event: ' + error.message);
+                //showNotification('Error adding event: ' + error.message);
             }
         });
         addEventForm.setAttribute('data-listener-attached', 'true');
@@ -1505,7 +1505,7 @@ function setupFormEventListeners() {
                 addTask();
             } catch (error) {
                 console.error('Error adding task:', error);
-                showNotification('Error adding task: ' + error.message);
+                //showNotification('Error adding task: ' + error.message);
             }
         });
         addTaskForm.setAttribute('data-listener-attached', 'true');
@@ -1522,7 +1522,7 @@ function setupFormEventListeners() {
                 addLink();
         } catch (error) {
                 console.error('Error adding link:', error);
-                showNotification('Error adding link: ' + error.message);
+                //showNotification('Error adding link: ' + error.message);
             }
         });
         addLinkForm.setAttribute('data-listener-attached', 'true');
