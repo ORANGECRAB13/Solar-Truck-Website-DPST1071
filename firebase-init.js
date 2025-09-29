@@ -16,9 +16,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Generate a unique session ID for this browser session
+function generateSessionId() {
+    let sessionId = localStorage.getItem('solarTruckSessionId');
+    if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('solarTruckSessionId', sessionId);
+    }
+    return sessionId;
+}
+
 // Make Firebase available globally
 window.firebaseApp = app;
 window.db = db;
+window.currentSessionId = generateSessionId();
 window.firebaseFunctions = {
     collection,
     addDoc,
@@ -33,13 +44,11 @@ window.firebaseFunctions = {
 
 // Load main script after Firebase is ready
 function loadMainScript() {
-    if (window.db && window.firebaseFunctions) {
+    if (window.db && window.firebaseFunctions && !window.mainScriptLoaded) {
+        window.mainScriptLoaded = true;
         const script = document.createElement('script');
-        script.src = 'script.js?v=5';
+        script.src = 'script.js?v=7';
         document.head.appendChild(script);
-    } else {
-        // Retry after a short delay
-        setTimeout(loadMainScript, 100);
     }
 }
 

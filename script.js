@@ -57,15 +57,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize Firebase data listeners
 function initializeFirebaseData() {
-    if (!window.db || !window.firebaseFunctions) {
+    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
         console.log('Firebase not available, using localStorage only');
         return;
     }
 
     const { collection, onSnapshot, query, orderBy } = window.firebaseFunctions;
+    const sessionId = window.currentSessionId;
     
-    // Set up real-time listeners for events
-    const eventsQuery = query(collection(window.db, 'events'), orderBy('date', 'asc'));
+    console.log('Initializing Firebase data for session:', sessionId);
+    
+    // Set up real-time listeners for events (session-specific)
+    const eventsQuery = query(collection(window.db, `sessions/${sessionId}/events`), orderBy('date', 'asc'));
     onSnapshot(eventsQuery, (snapshot) => {
         events = [];
         snapshot.forEach((doc) => {
@@ -75,8 +78,8 @@ function initializeFirebaseData() {
         renderCalendar();
     });
 
-    // Set up real-time listeners for tasks
-    const tasksQuery = query(collection(window.db, 'tasks'), orderBy('category', 'asc'));
+    // Set up real-time listeners for tasks (session-specific)
+    const tasksQuery = query(collection(window.db, `sessions/${sessionId}/tasks`), orderBy('category', 'asc'));
     onSnapshot(tasksQuery, (snapshot) => {
         tasks = [];
         snapshot.forEach((doc) => {
@@ -85,8 +88,8 @@ function initializeFirebaseData() {
         renderTasks();
     });
 
-    // Set up real-time listener for links
-    const linksQuery = collection(window.db, 'links');
+    // Set up real-time listener for links (session-specific)
+    const linksQuery = collection(window.db, `sessions/${sessionId}/links`);
     onSnapshot(linksQuery, (snapshot) => {
         if (!snapshot.empty) {
             const doc = snapshot.docs[0];
@@ -96,6 +99,16 @@ function initializeFirebaseData() {
         } else {
             // If no links in Firebase, save default links
             saveLinksToFirebase();
+        }
+    });
+
+    // Set up real-time listener for morph chart data (session-specific)
+    const morphQuery = collection(window.db, `sessions/${sessionId}/morphChart`);
+    onSnapshot(morphQuery, (snapshot) => {
+        if (!snapshot.empty) {
+            const doc = snapshot.docs[0];
+            morphChartData = doc.data();
+            loadMorphChart();
         }
     });
 }
@@ -133,19 +146,20 @@ function saveToLocalStorage() {
 
 // Firebase save functions
 async function saveEventToFirebase(eventData) {
-    if (!window.db || !window.firebaseFunctions) {
+    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
         return false;
     }
 
     try {
         const { collection, addDoc, doc, updateDoc } = window.firebaseFunctions;
+        const sessionId = window.currentSessionId;
         
         if (eventData.id && eventData.id.toString().length > 10) {
             // Update existing event
-            await updateDoc(doc(window.db, 'events', eventData.id), eventData);
+            await updateDoc(doc(window.db, `sessions/${sessionId}/events`, eventData.id), eventData);
         } else {
             // Add new event
-            await addDoc(collection(window.db, 'events'), eventData);
+            await addDoc(collection(window.db, `sessions/${sessionId}/events`), eventData);
         }
         return true;
     } catch (error) {
@@ -155,19 +169,20 @@ async function saveEventToFirebase(eventData) {
 }
 
 async function saveTaskToFirebase(taskData) {
-    if (!window.db || !window.firebaseFunctions) {
+    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
         return false;
     }
 
     try {
         const { collection, addDoc, doc, updateDoc } = window.firebaseFunctions;
+        const sessionId = window.currentSessionId;
         
         if (taskData.id && taskData.id.toString().length > 10) {
             // Update existing task
-            await updateDoc(doc(window.db, 'tasks', taskData.id), taskData);
+            await updateDoc(doc(window.db, `sessions/${sessionId}/tasks`, taskData.id), taskData);
         } else {
             // Add new task
-            await addDoc(collection(window.db, 'tasks'), taskData);
+            await addDoc(collection(window.db, `sessions/${sessionId}/tasks`), taskData);
         }
         return true;
     } catch (error) {
@@ -177,22 +192,23 @@ async function saveTaskToFirebase(taskData) {
 }
 
 async function saveLinksToFirebase() {
-    if (!window.db || !window.firebaseFunctions) {
+    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
         return false;
     }
 
     try {
         const { collection, addDoc, doc, updateDoc, getDocs } = window.firebaseFunctions;
+        const sessionId = window.currentSessionId;
         
-        // Check if links already exist in Firebase
-        const linksSnapshot = await getDocs(collection(window.db, 'links'));
+        // Check if links already exist in Firebase for this session
+        const linksSnapshot = await getDocs(collection(window.db, `sessions/${sessionId}/links`));
         if (linksSnapshot.empty) {
             // Create new document with default links
-            await addDoc(collection(window.db, 'links'), links);
+            await addDoc(collection(window.db, `sessions/${sessionId}/links`), links);
         } else {
             // Update existing document
             const docId = linksSnapshot.docs[0].id;
-            await updateDoc(doc(window.db, 'links', docId), links);
+            await updateDoc(doc(window.db, `sessions/${sessionId}/links`, docId), links);
         }
         
         return true;
@@ -202,16 +218,76 @@ async function saveLinksToFirebase() {
     }
 }
 
+async function saveMorphChartToFirebase(morphData) {
+    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+        return false;
+    }
+
+    try {
+        const { collection, addDoc, doc, updateDoc, getDocs } = window.firebaseFunctions;
+        const sessionId = window.currentSessionId;
+        
+        // Check if morph chart already exists in Firebase for this session
+        const morphSnapshot = await getDocs(collection(window.db, `sessions/${sessionId}/morphChart`));
+        if (morphSnapshot.empty) {
+            // Create new document
+            await addDoc(collection(window.db, `sessions/${sessionId}/morphChart`), morphData);
+        } else {
+            // Update existing document
+            const docId = morphSnapshot.docs[0].id;
+            await updateDoc(doc(window.db, `sessions/${sessionId}/morphChart`, docId), morphData);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error saving morph chart to Firebase:', error);
+        return false;
+    }
+}
+
+async function deleteEventFromFirebase(eventId) {
+    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+        return false;
+    }
+
+    try {
+        const { doc, deleteDoc } = window.firebaseFunctions;
+        const sessionId = window.currentSessionId;
+        
+        await deleteDoc(doc(window.db, `sessions/${sessionId}/events`, eventId));
+        return true;
+    } catch (error) {
+        console.error('Error deleting event from Firebase:', error);
+        return false;
+    }
+}
+
+async function deleteTaskFromFirebase(taskId) {
+    if (!window.db || !window.firebaseFunctions || !window.currentSessionId) {
+        return false;
+    }
+
+    try {
+        const { doc, deleteDoc } = window.firebaseFunctions;
+        const sessionId = window.currentSessionId;
+        
+        await deleteDoc(doc(window.db, `sessions/${sessionId}/tasks`, taskId));
+        return true;
+    } catch (error) {
+        console.error('Error deleting task from Firebase:', error);
+        return false;
+    }
+}
+
 // Clear all data
-function clearAllData() {
+async function clearAllData() {
     if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+        // Clear localStorage
         localStorage.removeItem('solarTruckEvents');
         localStorage.removeItem('solarTruckTasks');
         localStorage.removeItem('solarTruckLinks');
         localStorage.removeItem('solarTruckMorphChart');
         
-        events = [];
-        tasks = [];
         // Reset to default links with only your actual PDFs
         links = {
             course: [
@@ -226,10 +302,13 @@ function clearAllData() {
                 { title: "Project Brief", url: "pdfs/Project Brief.pdf" }
             ]
         };
+        
+        events = [];
+        tasks = [];
         morphChartData = null;
         
-        // Save the reset links to localStorage
-        saveToLocalStorage();
+        // Save the reset links to Firebase
+        await saveLinksToFirebase();
         
         renderEvents();
         renderTasks();
@@ -644,8 +723,21 @@ async function addEvent() {
     toggleAddEventSection();
 }
 
-function deleteEvent(index) {
+async function deleteEvent(index) {
     if (confirm('Are you sure you want to delete this event?')) {
+        const event = events[index];
+        
+        // Try Firebase first, fallback to localStorage
+        if (event.id && event.id.toString().length > 10) {
+            const firebaseSuccess = await deleteEventFromFirebase(event.id);
+            if (firebaseSuccess) {
+                events.splice(index, 1);
+                // Firebase listeners will handle re-rendering
+                return;
+            }
+        }
+        
+        // Fallback to local storage
         events.splice(index, 1);
         saveToLocalStorage();
         renderEvents();
@@ -768,22 +860,39 @@ async function addTask() {
     //showNotification('Task added successfully!');
 }
 
-function toggleTask(category, index) {
+async function toggleTask(category, index) {
     const categoryTasks = tasks.filter(task => task.category === category);
     const task = categoryTasks[index];
     task.completed = !task.completed;
     
-    saveToLocalStorage();
-    renderTasks();
+    // Try Firebase first, fallback to localStorage
+    const firebaseSuccess = await saveTaskToFirebase(task);
+    
+    if (!firebaseSuccess) {
+        // Fallback to local storage
+        saveToLocalStorage();
+        renderTasks();
+    }
 }
 
-function deleteTask(category, index) {
+async function deleteTask(category, index) {
     if (confirm('Are you sure you want to delete this task?')) {
         const categoryTasks = tasks.filter(task => task.category === category);
         const taskToDelete = categoryTasks[index];
         const globalIndex = tasks.findIndex(task => task.id === taskToDelete.id);
         
         if (globalIndex !== -1) {
+            // Try Firebase first, fallback to localStorage
+            if (taskToDelete.id && taskToDelete.id.toString().length > 10) {
+                const firebaseSuccess = await deleteTaskFromFirebase(taskToDelete.id);
+                if (firebaseSuccess) {
+                    tasks.splice(globalIndex, 1);
+                    // Firebase listeners will handle re-rendering
+                    return;
+                }
+            }
+            
+            // Fallback to local storage
             tasks.splice(globalIndex, 1);
             saveToLocalStorage();
             renderTasks();
@@ -919,9 +1028,14 @@ async function deleteLink(category, index) {
         if (links[category] && links[category][index]) {
             const deletedLink = links[category].splice(index, 1)[0];
             
-            // Save and render
-            saveToLocalStorage();
-            renderLinks();
+            // Try Firebase first, fallback to localStorage
+            const firebaseSuccess = await saveLinksToFirebase();
+            
+            if (!firebaseSuccess) {
+                // Fallback to local storage
+                saveToLocalStorage();
+                renderLinks();
+            }
             
            // showNotification('Link deleted successfully!');
         }
@@ -962,9 +1076,14 @@ async function uploadPDF() {
     // Clear form
     document.getElementById('uploadPDFForm').reset();
     
-    // Save and render
+    // Try Firebase first, fallback to localStorage
+    const firebaseSuccess = await saveLinksToFirebase();
+    
+    if (!firebaseSuccess) {
+        // Fallback to local storage
         saveToLocalStorage();
-    renderLinks();
+        renderLinks();
+    }
     
     //showNotification('PDF uploaded successfully! You can now view it directly in the browser.');
     
@@ -1125,29 +1244,37 @@ function loadMorphChart() {
     }
 }
 
-function saveMorphChart() {
-        const table = document.getElementById('morphTable');
-        const notes = document.getElementById('morphNotes').value;
-        
-        const morphData = {
-            table: [],
-            notes: notes,
+async function saveMorphChart() {
+    const table = document.getElementById('morphTable');
+    const notes = document.getElementById('morphNotes').value;
+    
+    const morphData = {
+        table: [],
+        notes: notes,
         updatedBy: currentUser || 'Anonymous',
         updatedAt: new Date().toISOString()
-        };
-        
-        const rows = table.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            const rowData = [];
-            const cells = row.querySelectorAll('td');
-            cells.forEach(cell => {
-                rowData.push(cell.textContent.trim());
-            });
-            morphData.table.push(rowData);
+    };
+    
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const rowData = [];
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            rowData.push(cell.textContent.trim());
         });
-        
+        morphData.table.push(rowData);
+    });
+    
     morphChartData = morphData;
-    saveToLocalStorage();
+    
+    // Try Firebase first, fallback to localStorage
+    const firebaseSuccess = await saveMorphChartToFirebase(morphData);
+    
+    if (!firebaseSuccess) {
+        // Fallback to local storage
+        saveToLocalStorage();
+    }
+    
     //showNotification('Morph chart saved successfully!');
 }
 
