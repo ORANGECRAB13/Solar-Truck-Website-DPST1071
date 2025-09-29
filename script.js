@@ -57,6 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize Firebase data listeners
 function initializeFirebaseData() {
+    console.log('initializeFirebaseData called');
+    console.log('Firebase db available:', !!window.db);
+    console.log('Firebase functions available:', !!window.firebaseFunctions);
+    
     if (!window.db || !window.firebaseFunctions) {
         console.log('Firebase not available, using localStorage only');
         return;
@@ -145,7 +149,10 @@ function saveToLocalStorage() {
 
 // Firebase save functions
 async function saveEventToFirebase(eventData) {
+    console.log('saveEventToFirebase called with:', eventData);
+    
     if (!window.db || !window.firebaseFunctions) {
+        console.log('Firebase not available - db:', !!window.db, 'functions:', !!window.firebaseFunctions);
         return false;
     }
 
@@ -154,11 +161,15 @@ async function saveEventToFirebase(eventData) {
         
         if (eventData.id && eventData.id.toString().length > 10) {
             // Update existing event
+            console.log('Updating existing event with ID:', eventData.id);
             await updateDoc(doc(window.db, 'events', eventData.id), eventData);
         } else {
             // Add new event
-            await addDoc(collection(window.db, 'events'), eventData);
+            console.log('Adding new event to Firebase...');
+            const docRef = await addDoc(collection(window.db, 'events'), eventData);
+            console.log('Event added with ID:', docRef.id);
         }
+        console.log('Event saved successfully to Firebase');
         return true;
     } catch (error) {
         console.error('Error saving event to Firebase:', error);
@@ -167,7 +178,10 @@ async function saveEventToFirebase(eventData) {
 }
 
 async function saveTaskToFirebase(taskData) {
+    console.log('saveTaskToFirebase called with:', taskData);
+    
     if (!window.db || !window.firebaseFunctions) {
+        console.log('Firebase not available for tasks - db:', !!window.db, 'functions:', !!window.firebaseFunctions);
         return false;
     }
 
@@ -176,11 +190,15 @@ async function saveTaskToFirebase(taskData) {
         
         if (taskData.id && taskData.id.toString().length > 10) {
             // Update existing task
+            console.log('Updating existing task with ID:', taskData.id);
             await updateDoc(doc(window.db, 'tasks', taskData.id), taskData);
         } else {
             // Add new task
-            await addDoc(collection(window.db, 'tasks'), taskData);
+            console.log('Adding new task to Firebase...');
+            const docRef = await addDoc(collection(window.db, 'tasks'), taskData);
+            console.log('Task added with ID:', docRef.id);
         }
+        console.log('Task saved successfully to Firebase');
         return true;
     } catch (error) {
         console.error('Error saving task to Firebase:', error);
@@ -215,7 +233,10 @@ async function saveLinksToFirebase() {
 }
 
 async function saveMorphChartToFirebase(morphData) {
+    console.log('saveMorphChartToFirebase called with:', morphData);
+    
     if (!window.db || !window.firebaseFunctions) {
+        console.log('Firebase not available for morph chart - db:', !!window.db, 'functions:', !!window.firebaseFunctions);
         return false;
     }
 
@@ -223,16 +244,21 @@ async function saveMorphChartToFirebase(morphData) {
         const { collection, addDoc, doc, updateDoc, getDocs } = window.firebaseFunctions;
         
         // Check if morph chart already exists in Firebase
+        console.log('Checking for existing morph chart...');
         const morphSnapshot = await getDocs(collection(window.db, 'morphChart'));
         if (morphSnapshot.empty) {
             // Create new document
-            await addDoc(collection(window.db, 'morphChart'), morphData);
+            console.log('Creating new morph chart document...');
+            const docRef = await addDoc(collection(window.db, 'morphChart'), morphData);
+            console.log('Morph chart created with ID:', docRef.id);
         } else {
             // Update existing document
             const docId = morphSnapshot.docs[0].id;
+            console.log('Updating existing morph chart with ID:', docId);
             await updateDoc(doc(window.db, 'morphChart', docId), morphData);
         }
         
+        console.log('Morph chart saved successfully to Firebase');
         return true;
     } catch (error) {
         console.error('Error saving morph chart to Firebase:', error);
