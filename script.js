@@ -82,7 +82,7 @@ function initializeFirebaseData() {
     });
 
     // Set up real-time listeners for tasks (shared across all users)
-    const tasksQuery = query(collection(window.db, 'tasks'), orderBy('category', 'asc'));
+    const tasksQuery = collection(window.db, 'tasks');
     onSnapshot(tasksQuery, (snapshot) => {
         console.log('Firebase tasks listener triggered, snapshot size:', snapshot.size);
         tasks = [];
@@ -910,8 +910,13 @@ async function addTask() {
         taskData.id = Date.now(); // Add local ID for localStorage
         tasks.push(taskData);
         saveToLocalStorage();
-        renderTasks();
     }
+    
+    // Always render tasks to ensure UI is updated
+    // (Firebase listeners should handle this, but this ensures it works)
+    setTimeout(() => {
+        renderTasks();
+    }, 100); // Small delay to ensure Firebase listener has processed the data
     
     //showNotification('Task added successfully!');
 }
