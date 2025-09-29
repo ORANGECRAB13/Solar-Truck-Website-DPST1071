@@ -1625,6 +1625,11 @@ body {
         text-align: center;
     }
     
+    /* Move Project Hub button down significantly on mobile */
+    .hero-project-hub-button {
+        margin-top: 250% !important;
+    }
+    
     .modal-content {
         margin: 5% auto;
         width: 95%;
