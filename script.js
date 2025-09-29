@@ -84,10 +84,14 @@ function initializeFirebaseData() {
     // Set up real-time listeners for tasks (shared across all users)
     const tasksQuery = query(collection(window.db, 'tasks'), orderBy('category', 'asc'));
     onSnapshot(tasksQuery, (snapshot) => {
+        console.log('Firebase tasks listener triggered, snapshot size:', snapshot.size);
         tasks = [];
         snapshot.forEach((doc) => {
-            tasks.push({ id: doc.id, ...doc.data() });
+            const taskData = { id: doc.id, ...doc.data() };
+            console.log('Loading task from Firebase:', taskData);
+            tasks.push(taskData);
         });
+        console.log('All tasks loaded from Firebase:', tasks);
         renderTasks();
     });
 
@@ -812,6 +816,14 @@ function renderTasks() {
         const categoryTasks = tasks.filter(task => task.category === category);
         console.log(`Found ${categoryTasks.length} tasks for category: ${category}`);
         
+        // Extra debugging for procurement tasks
+        if (category === 'procurement') {
+            console.log('=== PROCUREMENT TASKS DEBUG ===');
+            console.log('All tasks:', tasks);
+            console.log('Procurement tasks found:', categoryTasks);
+            console.log('Task list element:', taskList);
+        }
+        
         taskList.innerHTML = '';
         
         if (categoryTasks.length === 0) {
@@ -870,6 +882,8 @@ async function addTask() {
     const title = document.getElementById('taskTitle').value;
     const category = document.getElementById('taskCategory').value;
     
+    console.log('addTask called with:', { title, category });
+    
     if (!title || !category) {
         //showNotification('Please fill in both title and category.');
         return;
@@ -882,10 +896,14 @@ async function addTask() {
         createdBy: currentUser || 'Anonymous'
     };
     
+    console.log('Task data to save:', taskData);
+    
     document.getElementById('addTaskForm').reset();
     
     // Try Firebase first, fallback to localStorage
     const firebaseSuccess = await saveTaskToFirebase(taskData);
+    
+    console.log('Firebase save success:', firebaseSuccess);
         
     if (!firebaseSuccess) {
         // Fallback to local storage
