@@ -1627,7 +1627,7 @@ body {
     
     /* Move Project Hub button down significantly on mobile */
     .hero-project-hub-button {
-        margin-top: 250% !important;
+        margin-top: 100% !important;
     }
     
     .modal-content {
